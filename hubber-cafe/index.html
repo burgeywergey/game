@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Hubber Cafe — Smethport, PA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="#home" class="nav-logo">The Hubber Cafe</a>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#about">About</a></li>
+        <li><a href="#menu">Menu</a></li>
+        <li><a href="#hours">Hours</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="home">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <p class="hero-tag">Smethport, Pennsylvania</p>
+      <h1 class="hero-title">The Hubber Cafe</h1>
+      <p class="hero-sub">Where everyone's a regular.</p>
+      <div class="hero-cta">
+        <a href="#menu" class="btn btn-primary">See Our Menu</a>
+        <a href="#hours" class="btn btn-outline">Find Us</a>
+      </div>
+    </div>
+    <div class="hero-scroll">
+      <span>Scroll</span>
+      <div class="hero-scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="section about" id="about">
+    <div class="container about-grid">
+      <div class="about-image">
+        <div class="about-img-box">
+          <div class="about-img-placeholder">
+            <svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="100" cy="80" r="30" fill="#c8a97e" opacity="0.6"/>
+              <path d="M60 140 Q100 110 140 140" stroke="#c8a97e" stroke-width="3" fill="none" opacity="0.8"/>
+              <path d="M70 155 Q100 135 130 155" stroke="#c8a97e" stroke-width="2" fill="none" opacity="0.5"/>
+              <circle cx="100" cy="80" r="12" fill="#8b5e3c"/>
+              <path d="M88 80 Q100 70 112 80" stroke="white" stroke-width="1.5" fill="none"/>
+            </svg>
+          </div>
+          <div class="about-badge">Est. in Smethport</div>
+        </div>
+      </div>
+      <div class="about-text">
+        <span class="section-label">Our Story</span>
+        <h2 class="section-title">A Gathering Place<br/>at the Heart of Town</h2>
+        <p>The Hubber Cafe is Smethport's favorite spot to slow down, reconnect, and enjoy something delicious. Whether you're swinging by for your morning coffee, sitting down for a hearty lunch, or catching up with a friend over a slice of homemade pie — you're always welcome here.</p>
+        <p>We take pride in fresh, made-from-scratch cooking, friendly faces, and the kind of atmosphere that makes you feel right at home. Because for us, this isn't just a cafe — it's the hub of our community.</p>
+        <div class="about-pillars">
+          <div class="pillar">
+            <div class="pillar-icon">☕</div>
+            <div class="pillar-label">Fresh-Brewed Coffee</div>
+          </div>
+          <div class="pillar">
+            <div class="pillar-icon">🥞</div>
+            <div class="pillar-label">Homestyle Cooking</div>
+          </div>
+          <div class="pillar">
+            <div class="pillar-icon">🏡</div>
+            <div class="pillar-label">Community Spirit</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MENU -->
+  <section class="section menu" id="menu">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-label">What We Serve</span>
+        <h2 class="section-title">Our Menu</h2>
+        <p class="section-desc">Simple, satisfying, and made with care. Something for everyone, every time of day.</p>
+      </div>
+
+      <div class="menu-tabs" id="menuTabs">
+        <button class="menu-tab active" data-tab="breakfast">Breakfast</button>
+        <button class="menu-tab" data-tab="lunch">Lunch</button>
+        <button class="menu-tab" data-tab="drinks">Drinks</button>
+        <button class="menu-tab" data-tab="sweets">Sweets</button>
+      </div>
+
+      <div class="menu-panels">
+
+        <div class="menu-panel active" data-panel="breakfast">
+          <div class="menu-grid">
+            <div class="menu-item">
+              <div class="menu-item-top">
+                <h4>The Hubber Stack</h4>
+                <span class="menu-price">$9.50</span>
+              </div>
+              <p>Fluffy buttermilk pancakes, maple syrup, whipped butter</p>
+            </div>
+            <div class="menu-item">
+              <div class="menu-item-top">
+                <h4>Eggs Your Way</h4>
+                <span class="menu-price">$7.00</span>
+              </div>
+              <p>Two eggs cooked to order, toast, home fries</p>
+            </div>
+            <div class="menu-item">
+              <div class="menu-item-top">
+                <h4>Country Breakfast</h4>
+                <span class="menu-price">$11.00</span>
+              </div>
+              <p>Two eggs, sausage or bacon, biscuit &amp; gravy, home fries</p>
+            </div>
+            <div class="menu-item">
+              <div class="menu-item-top">
+                <h4>Veggie Scramble</h4>
+                <span class="menu-price">$8.50</span>
+              </div>
+              <p>Peppers, onions, mushrooms, spinach, and cheese</p>
+            </div>
+            <div class="menu-item">
+              <div class="menu-item-top">
+                <h4>French Toast</h4>
+                <span class="menu-price">$8.00</span>
+              </div>
+              <p>Thick-cut bread, cinnamon-vanilla custard, powdered sugar</p>
+            </div>
+            <div class="menu-item">
+              <div class="menu-item-top">
+                <h4>Breakfast Sandwich</h4>
+                <span class="menu-price">$6.50</span>
+              </div>
+              <p>Egg, cheese, and your choice of meat on a toasted roll</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="menu-panel" data-panel="lunch">
+          <div class="menu-grid">
+            <div class="menu-item">
+              <div class="menu-item-top">
+                <h4>Hubber Burger</h4>
+                <span class="menu-price">$11.50</span>
+              </div>
+              <p>Half-pound beef patty, lettuce, tomato, pickles, special sauce</p>
+            </div>
+            <div class="menu-item">
+              <div class="menu-item-top">
+                <h4>Chicken Club</h4>
+                <span class="menu-price">$10.50</span>
+              </div>
+              <p>Grilled chicken, bacon, avocado, Swiss, toasted sourdough</p>
+            </div>
+            <div class="menu-item">
+              <div class="menu-item-top">
+                <h4>Soup of the Day</h4>
+                <span class="menu-price">$5.00</span>
+              </div>
+              <p>Ask your server — made fresh every morning</p>
+            </div>
+            <div class="menu-item">
+              <div class="menu-item-top">
+                <h4>BLT</h4>
+                <span class="menu-price">$8.00</span>
+              </div>
+              <p>Thick-cut bacon, garden tomato, crisp lettuce, mayo, white toast</p>
+            </div>
+            <div class="menu-item">
+              <div class="menu-item-top">
+                <h4>Garden Salad</h4>
+                <span class="menu-price">$7.50</span>
+              </div>
+              <p>Mixed greens, cucumber, cherry tomato, croutons, your choice of dressing</p>
+            </div>
+            <div class="menu-item">
+              <div class="menu-item-top">
+                <h4>Grilled Cheese</h4>
+                <span class="menu-price">$6.00</span>
+              </div>
+              <p>Three-cheese blend on buttered, golden-grilled bread</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="menu-panel" data-panel="drinks">
+          <div class="menu-grid">
+            <div class="menu-item">
+              <div class="menu-item-top">
+                <h4>Drip Coffee</h4>
+                <span class="menu-price">$2.50</span>
+              </div>
+              <p>Fresh-brewed, free refills all day</p>
+            </div>
+            <div class="menu-item">
+              <div class="menu-item-top">
+                <h4>Latte</h4>
+                <span class="menu-price">$4.75</span>
+              </div>
+              <p>Espresso, steamed milk — hot or iced</p>
+            </div>
+            <div class="menu-item">
+              <div class="menu-item-top">
+                <h4>Cappuccino</h4>
+                <span class="menu-price">$4.50</span>
+              </div>
+              <p>Double espresso, velvety foam</p>
+            </div>
+            <div class="menu-item">
+              <div class="menu-item-top">
+                <h4>Hot Tea</h4>
+                <span class="menu-price">$2.50</span>
+              </div>
+              <p>Assorted varieties — ask your server</p>
+            </div>
+            <div class="menu-item">
+              <div class="menu-item-top">
+                <h4>Fresh Lemonade</h4>
+                <span class="menu-price">$3.25</span>
+              </div>
+              <p>Squeezed in-house, sweetened just right</p>
+            </div>
+            <div class="menu-item">
+              <div class="menu-item-top">
+                <h4>Milkshake</h4>
+                <span class="menu-price">$5.50</span>
+              </div>
+              <p>Vanilla, chocolate, or strawberry — thick and creamy</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="menu-panel" data-panel="sweets">
+          <div class="menu-grid">
+            <div class="menu-item">
+              <div class="menu-item-top">
+                <h4>Pie of the Day</h4>
+                <span class="menu-price">$4.50</span>
+              </div>
+              <p>Homemade, rotating daily — ask your server what's fresh</p>
+            </div>
+            <div class="menu-item">
+              <div class="menu-item-top">
+                <h4>Cinnamon Roll</h4>
+                <span class="menu-price">$3.75</span>
+              </div>
+              <p>Oven-warm, cream cheese frosting</p>
+            </div>
+            <div class="menu-item">
+              <div class="menu-item-top">
+                <h4>Chocolate Brownie</h4>
+                <span class="menu-price">$3.00</span>
+              </div>
+              <p>Fudgy, rich, and served warm</p>
+            </div>
+            <div class="menu-item">
+              <div class="menu-item-top">
+                <h4>Cookie</h4>
+                <span class="menu-price">$1.75</span>
+              </div>
+              <p>Chocolate chip, oatmeal raisin, or sugar — baked fresh daily</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- HOURS & LOCATION -->
+  <section class="section hours-section" id="hours">
+    <div class="container hours-grid">
+      <div class="hours-box">
+        <span class="section-label">When We're Open</span>
+        <h2 class="section-title">Hours</h2>
+        <table class="hours-table">
+          <tr>
+            <td>Monday – Friday</td>
+            <td>7:00 AM – 3:00 PM</td>
+          </tr>
+          <tr>
+            <td>Saturday</td>
+            <td>7:00 AM – 2:00 PM</td>
+          </tr>
+          <tr>
+            <td>Sunday</td>
+            <td>8:00 AM – 1:00 PM</td>
+          </tr>
+        </table>
+        <p class="hours-note">Kitchen closes 30 minutes before closing time. Holiday hours may vary.</p>
+      </div>
+      <div class="location-box">
+        <span class="section-label">Where to Find Us</span>
+        <h2 class="section-title">Location</h2>
+        <div class="location-details">
+          <div class="location-row">
+            <div class="location-icon">📍</div>
+            <div>
+              <strong>The Hubber Cafe</strong><br/>
+              Smethport, Pennsylvania 16749
+            </div>
+          </div>
+          <div class="location-row">
+            <div class="location-icon">📞</div>
+            <div>
+              <a href="tel:+18145551234">(814) 555-1234</a>
+            </div>
+          </div>
+          <div class="location-row">
+            <div class="location-icon">✉️</div>
+            <div>
+              <a href="mailto:hello@hubbercafe.com">hello@hubbercafe.com</a>
+            </div>
+          </div>
+        </div>
+        <div class="map-placeholder">
+          <div class="map-pin">📍</div>
+          <p>Smethport, PA</p>
+          <p class="map-sub">McKean County · Pennsylvania Wilds</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="section contact-section" id="contact">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-label">Say Hello</span>
+        <h2 class="section-title">Get In Touch</h2>
+        <p class="section-desc">Questions, catering inquiries, or just want to say hi? We'd love to hear from you.</p>
+      </div>
+      <form class="contact-form" id="contactForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" placeholder="Your name" required />
+          </div>
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="your@email.com" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="message">Message</label>
+          <textarea id="message" name="message" rows="5" placeholder="What's on your mind?" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Send Message</button>
+        <p class="form-success" id="formSuccess">Thanks! We'll be in touch soon. ☕</p>
+      </form>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <div class="footer-logo">The Hubber Cafe</div>
+        <p>Where everyone's a regular.</p>
+      </div>
+      <div class="footer-links">
+        <a href="#about">About</a>
+        <a href="#menu">Menu</a>
+        <a href="#hours">Hours</a>
+        <a href="#contact">Contact</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 The Hubber Cafe · Smethport, PA · Made with ☕</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

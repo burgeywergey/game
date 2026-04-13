@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cabo Escape — Cruise Room Breakout</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0a0a0f;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+      font-family: 'Courier New', monospace;
+      color: #e8dfc8;
+    }
+    #title-screen {
+      position: absolute;
+      inset: 0;
+      background: #0a0a0f;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      gap: 18px;
+    }
+    #title-screen h1 {
+      font-size: 2.2rem;
+      color: #f5c842;
+      text-shadow: 0 0 20px #f5c84288;
+      letter-spacing: 4px;
+      text-align: center;
+    }
+    #title-screen .sub {
+      color: #7ab3d4;
+      font-size: 0.9rem;
+      letter-spacing: 2px;
+    }
+    #title-screen .story {
+      max-width: 500px;
+      text-align: center;
+      font-size: 0.82rem;
+      color: #b0c8e0;
+      line-height: 1.7;
+      border: 1px solid #1e3a5a;
+      padding: 15px 20px;
+      background: #0d1f35;
+    }
+    #title-screen .controls-hint {
+      font-size: 0.78rem;
+      color: #7ab3d4;
+      text-align: center;
+      line-height: 1.8;
+    }
+    #title-screen button {
+      background: #f5c842;
+      color: #0a0a0f;
+      border: none;
+      padding: 10px 40px;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: bold;
+      letter-spacing: 2px;
+      cursor: pointer;
+      text-transform: uppercase;
+    }
+    #title-screen button:hover { background: #fff07a; }
+
+    #game-wrapper {
+      position: relative;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    canvas {
+      image-rendering: pixelated;
+      border: 2px solid #1e3a5a;
+      display: block;
+    }
+    #hud {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 8px;
+      background: #0d1f35;
+      border: 1px solid #1e3a5a;
+      font-size: 0.75rem;
+    }
+    #hud .timer { color: #e07070; font-weight: bold; font-size: 0.9rem; }
+    #hud .timer.urgent { animation: blink 0.5s infinite; color: #ff4444; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    #hud .controls { color: #4a7a9b; font-size: 0.65rem; }
+    #dialog-box {
+      width: 100%;
+      background: #0d1f35;
+      border: 2px solid #f5c842;
+      padding: 10px 14px;
+      font-size: 0.78rem;
+      line-height: 1.6;
+      color: #e8dfc8;
+      min-height: 52px;
+      display: none;
+      position: relative;
+    }
+    #dialog-box .speaker { color: #f5c842; font-weight: bold; margin-bottom: 2px; }
+    #dialog-box .dismiss { position: absolute; right: 10px; bottom: 6px; color: #4a7a9b; font-size: 0.65rem; }
+    #inventory-bar {
+      width: 100%;
+      display: flex;
+      gap: 6px;
+      padding: 4px 8px;
+      background: #0a1628;
+      border: 1px solid #1e3a5a;
+      flex-wrap: wrap;
+      min-height: 32px;
+      font-size: 0.7rem;
+      align-items: center;
+    }
+    #inventory-bar .inv-label { color: #4a7a9b; margin-right: 4px; }
+    .inv-item {
+      background: #1e3a5a;
+      color: #f5c842;
+      padding: 2px 8px;
+      border: 1px solid #2a5a8a;
+      cursor: default;
+    }
+    #win-screen, #lose-screen {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      gap: 14px;
+      background: rgba(0,0,0,0.88);
+    }
+    #win-screen h2 { color: #f5c842; font-size: 2rem; text-shadow: 0 0 20px #f5c842; }
+    #lose-screen h2 { color: #e07070; font-size: 2rem; }
+    #win-screen p, #lose-screen p { color: #b0c8e0; font-size: 0.85rem; text-align: center; max-width: 400px; line-height: 1.7; }
+    .end-btn {
+      background: #f5c842; color: #0a0a0f; border: none;
+      padding: 8px 30px; font-family: inherit; font-size: 0.9rem;
+      font-weight: bold; cursor: pointer; letter-spacing: 2px; text-transform: uppercase;
+    }
+    .end-btn:hover { background: #fff07a; }
+  </style>
+</head>
+<body>
+
+<!-- TITLE SCREEN -->
+<div id="title-screen">
+  <h1>⚓ CABO ESCAPE ⚓</h1>
+  <div class="sub">A Cruise Room Breakout</div>
+  <div class="story">
+    Jaden Leger (Louisiana) and Klayton Rogers (Pennsylvania) woke up to find themselves locked in Cabin 714 aboard the Margarita Queen — anchored off Cabo San Lucas.<br><br>
+    The camel-riding excursion leaves the dock in <strong style="color:#f5c842">15 minutes</strong>. The door won't budge. Something is very wrong.<br><br>
+    Solve the puzzles. Find the key. Get out before they leave without you!
+  </div>
+  <div class="controls-hint">
+    WASD / Arrow Keys — Move &nbsp;|&nbsp; E — Interact / Pick Up<br>
+    I — Inspect Inventory &nbsp;|&nbsp; Space — Dismiss Dialog
+  </div>
+  <button id="start-btn">PLAY</button>
+</div>
+
+<!-- GAME -->
+<div id="game-wrapper">
+  <div id="hud">
+    <span>⛵ Cabin 714 — Margarita Queen</span>
+    <span class="timer" id="timer">⏱ 15:00</span>
+    <span class="controls">WASD=Move &nbsp; E=Interact &nbsp; Space=Dismiss</span>
+  </div>
+  <canvas id="canvas" width="640" height="400"></canvas>
+  <div id="dialog-box">
+    <div class="speaker" id="dialog-speaker"></div>
+    <div id="dialog-text"></div>
+    <div class="dismiss">[SPACE to dismiss]</div>
+  </div>
+  <div id="inventory-bar">
+    <span class="inv-label">INVENTORY:</span>
+    <span id="inv-items" style="color:#4a7a9b;font-style:italic">empty</span>
+  </div>
+
+  <!-- WIN/LOSE overlays inside game-wrapper -->
+  <div id="win-screen" style="position:fixed">
+    <h2>🐪 YOU ESCAPED! 🐪</h2>
+    <p>Jaden and Klayton burst out of Cabin 714 and sprinted down the gangway — they made the camel ride with 30 seconds to spare!<br><br><em>"Only in Cabo."</em> — Jaden Leger, Louisiana</p>
+    <button class="end-btn" onclick="location.reload()">Play Again</button>
+  </div>
+  <div id="lose-screen" style="position:fixed">
+    <h2>🚢 MISSED THE EXCURSION</h2>
+    <p>The camels left without Jaden and Klayton. They spent the afternoon watching the shore from the porthole, eating warm chips from the minibar.<br><br>Some Cabo adventure.</p>
+    <button class="end-btn" onclick="location.reload()">Try Again</button>
+  </div>
+</div>
+
+<script>
+// ─── CONSTANTS ────────────────────────────────────────────────────────────────
+const TILE = 32;
+const COLS = 20;
+const ROWS = 12; // slightly taller room + corridor at top
+const W = COLS * TILE; // 640
+const H = ROWS * TILE; // 384 — canvas height adjusted below
+
+// ─── CANVAS SETUP ─────────────────────────────────────────────────────────────
+const canvas = document.getElementById('canvas');
+canvas.width = W;
+canvas.height = H;
+const ctx = canvas.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+
+// ─── COLORS ───────────────────────────────────────────────────────────────────
+const C = {
+  floor:    '#2a1f14',
+  floorAlt: '#231a10',
+  wall:     '#1a2a3a',
+  wallTop:  '#2a4a6a',
+  carpet:   '#3a1a2a',
+  carpetDk: '#2a1020',
+  bed:      '#4a6a9a',
+  bedSheet: '#c8d8f0',
+  desk:     '#5a3a20',
+  window:   '#7ab3d4',
+  windowFr: '#1e3a5a',
+  door:     '#4a3020',
+  doorFr:   '#6a5030',
+  doorLk:   '#8a2020',
+  safe:     '#3a3a3a',
+  safeDoor: '#4a4a4a',
+  painting: '#5a3a1a',
+  plant:    '#2a5a2a',
+  plantPot: '#6a4a2a',
+  rug:      '#6a2a2a',
+  dresser:  '#5a4a30',
+  lamp:     '#d4a843',
+  lampBase: '#8a6a30',
+  porthole: '#7ab3d4',
+  porthFr:  '#3a5a7a',
+  nightst:  '#5a3a20',
+  book:     '#8a3a3a',
+  key:      '#d4a843',
+  note:     '#e8dfc8',
+  jaden:    '#e8a870',
+  klayton:  '#d4c8b0',
+  jadenHat: '#c84a4a',
+  klayShirt:'#4a8a4a',
+  npc1:     '#b07840',
+  outline:  '#000',
+  interact: '#f5c842',
+  shadow:   'rgba(0,0,0,0.4)',
+};
+
+// ─── MAP DEFINITION ───────────────────────────────────────────────────────────
+// Room layout (20x12 tiles)
+// Wall = W, Floor = ., Carpet = c
+// Objects placed separately via object list
+
+// Row 0-1: top wall + corridor hint
+// Row 2-9: main cabin floor
+// Row 10-11: bottom wall
+
+const MAP_TILES = [
+//  0    1    2    3    4    5    6    7    8    9   10   11   12   13   14   15   16   17   18   19
+  ['W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W'],
+  ['W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W'],
+  ['W', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', 'W'],
+  ['W', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', 'W'],
+  ['W', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', 'W'],
+  ['W', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', 'W'],
+  ['W', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', 'W'],
+  ['W', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', 'W'],
+  ['W', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', 'W'],
+  ['W', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', '.', 'W'],
+  ['W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W'],
+  ['W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W'],
+];
+
+// Objects: {id, x, y, w, h, solid, type, label, state, ...}
+// x,y in tile coords
+const OBJECTS_INIT = [
+  // === EXIT DOOR (top-center, locked) ===
+  { id:'door', x:9, y:0, w:2, h:2, solid:true, type:'door', label:'Exit Door',
+    state:'locked', interactRange:2 },
+
+  // === BED (Jaden's, left side) ===
+  { id:'bed_j', x:1, y:2, w:3, h:3, solid:true, type:'deco', label:"Jaden's Bed",
+    msg:"Jaden's bed. Louisiana State pennant on the pillow. Under the pillow there's a folded note!",
+    hasItem:'note_pillow', itemCollected:false },
+
+  // === BED (Klayton's, right side) ===
+  { id:'bed_k', x:16, y:2, w:3, h:3, solid:true, type:'deco', label:"Klayton's Bed",
+    msg:"Klayton's bed. A Philly Eagles pillowcase. Something is taped under the mattress...",
+    hasItem:'key_fragment', itemCollected:false },
+
+  // === DESK (bottom-left) ===
+  { id:'desk', x:1, y:7, w:3, h:2, solid:true, type:'deco', label:'Desk',
+    msg:"A wooden desk with cruise brochures scattered about. A locked drawer catches your eye.",
+    hasItem:null },
+
+  // === DESK DRAWER (locked, needs code) ===
+  { id:'drawer', x:1, y:9, w:2, h:1, solid:false, type:'puzzle', label:'Locked Drawer',
+    state:'locked', code:'7-1-4', hint:'The drawer has a 3-digit combination lock. (Cabin number?)',
+    hasItem:'screwdriver', itemCollected:false },
+
+  // === SAFE (right wall) ===
+  { id:'safe', x:17, y:5, w:2, h:2, solid:true, type:'puzzle', label:'Wall Safe',
+    state:'locked', code:'cabo', hint:'A 4-letter combination. Think of where you are...',
+    hasItem:'master_key', itemCollected:false },
+
+  // === PAINTING (center-top wall) ===
+  { id:'painting', x:7, y:2, w:2, h:2, solid:false, type:'clue', label:'Seascape Painting',
+    msg:'A painting of Cabo San Lucas. On the back of the frame, someone scratched: "C-A-B-O"',
+    examined:false },
+
+  // === PORTHOLE (right wall) ===
+  { id:'porthole', x:18, y:3, w:1, h:2, solid:false, type:'deco', label:'Porthole',
+    msg:'Through the porthole you can see the golden beaches of Cabo. A camel caravan is forming at the dock. HURRY!' },
+
+  // === NIGHTSTAND (left of jaden bed) ===
+  { id:'nightstand', x:4, y:2, w:1, h:1, solid:true, type:'deco', label:'Nightstand',
+    msg:"A nightstand with a lamp and a cruise schedule. The excursion boards at 9:15 AM. It's 9:00 AM now!",
+    hasItem:null },
+
+  // === BOOKSHELF (back wall center) ===
+  { id:'bookshelf', x:9, y:2, w:3, h:2, solid:true, type:'clue', label:'Bookshelf',
+    msg:'A shelf of travel books. One is titled "Louisiana Gumbo & Pennsylvania Pretzels". A sticky note inside reads: "Cabin # = drawer code"',
+    examined:false },
+
+  // === PLANT (corner) ===
+  { id:'plant', x:18, y:9, w:1, h:1, solid:true, type:'deco', label:'Tropical Plant',
+    msg:'A fake tropical plant. Very Cabo-appropriate. Wait — there\'s a folded note tucked in the soil!',
+    hasItem:'plant_note', itemCollected:false },
+
+  // === MINI FRIDGE (bottom right) ===
+  { id:'fridge', x:16, y:8, w:2, h:2, solid:true, type:'deco', label:'Mini-Fridge',
+    msg:'Packed with overpriced sodas and snacks. Behind the fridge there\'s a screwdriver!',
+    hasItem:'screwdriver_behind', itemCollected:false },
+
+  // === VENT (needs screwdriver) ===
+  { id:'vent', x:1, y:5, w:1, h:1, solid:false, type:'puzzle', label:'Air Vent',
+    state:'closed', hasItem:'vent_note', itemCollected:false,
+    msg:'A wall vent with 4 screws. You need a screwdriver.' },
+
+  // === KLAYTON NPC ===
+  { id:'klayton', x:12, y:6, w:1, h:1, solid:false, type:'npc', label:'Klayton',
+    dialogs:[
+      "Klayton: \"Yo Jaden, I tried the door — it's deadbolted from outside. Someone locked us in!\"",
+      "Klayton: \"The safe on the wall... I saw the maid punch in a word when she dropped off towels. It was the city name. CABO.\"",
+      "Klayton: \"Bro if we miss these camels I'm gonna be so upset. I've been talking about this for months.\"",
+      "Klayton: \"Check under my mattress — I hid the key fragment there before we went to dinner last night.\"",
+    ],
+    dialogIndex:0 },
+];
+
+// ─── INVENTORY ITEMS REGISTRY ─────────────────────────────────────────────────
+const ITEM_NAMES = {
+  'note_pillow':      '📝 Pillow Note',
+  'key_fragment':     '🔑 Key Fragment',
+  'plant_note':       '📝 Plant Note',
+  'screwdriver':      '🔧 Screwdriver',
+  'screwdriver_behind':'🔧 Screwdriver',
+  'master_key':       '🗝 Master Key',
+  'vent_note':        '📝 Vent Note',
+};
+
+const ITEM_MSGS = {
+  'note_pillow':       "Jaden picked up a note from his pillow. It reads: \"The drawer uses the cabin number. We're in 714.\"",
+  'key_fragment':      "Got the KEY FRAGMENT from Klayton's bed! One half of the master key — need to find the other half.",
+  'plant_note':        "Plant note reads: \"Safe word = where we're anchored. One word, four letters.\"",
+  'screwdriver':       "Got a SCREWDRIVER! Now you can open the air vent!",
+  'screwdriver_behind':"Got a SCREWDRIVER from behind the fridge! Now you can open the air vent!",
+  'master_key':        "Got the MASTER KEY from the safe! Combine it with the Key Fragment to escape!",
+  'vent_note':         "Vent note: \"The key fragment goes with the master key — together they open the deadbolt!\"",
+};
+
+// Floor items that appear as visible pickups (spawned when unlocked)
+// { id, x, y, collected }
+let floorItems = [];
+
+// ─── GAME STATE ───────────────────────────────────────────────────────────────
+let gs = {
+  player: { x: 10 * TILE, y: 7 * TILE, dir: 'down', moving: false },
+  objects: JSON.parse(JSON.stringify(OBJECTS_INIT)),
+  inventory: [],
+  dialog: null,
+  dialogQueue: [],
+  puzzleMode: false,
+  puzzleInput: '',
+  timeLeft: 15 * 60,
+  gameOver: false,
+  won: false,
+  keys: {},
+  interactCooldown: 0,
+  stepFrame: 0,
+};
+
+// ─── TIMER ────────────────────────────────────────────────────────────────────
+let lastTime = 0;
+function updateTimer(dt) {
+  if (gs.gameOver) return;
+  gs.timeLeft -= dt;
+  if (gs.timeLeft <= 0) {
+    gs.timeLeft = 0;
+    gs.gameOver = true;
+    gs.won = false;
+    setTimeout(() => {
+      document.getElementById('lose-screen').style.display = 'flex';
+    }, 500);
+  }
+  const m = Math.floor(gs.timeLeft / 60);
+  const s = Math.floor(gs.timeLeft % 60);
+  const el = document.getElementById('timer');
+  el.textContent = `⏱ ${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  el.className = gs.timeLeft < 60 ? 'timer urgent' : 'timer';
+}
+
+// ─── DIALOG ───────────────────────────────────────────────────────────────────
+function showDialog(speaker, text) {
+  gs.dialog = { speaker, text };
+  const box = document.getElementById('dialog-box');
+  box.style.display = 'block';
+  document.getElementById('dialog-speaker').textContent = speaker;
+  document.getElementById('dialog-text').textContent = text;
+  document.querySelector('#dialog-box .dismiss').textContent = '[SPACE or E to dismiss]';
+}
+
+function dismissDialog() {
+  if (gs.puzzleMode) return;
+  gs.dialog = null;
+  if (gs.dialogQueue.length > 0) {
+    const next = gs.dialogQueue.shift();
+    showDialog(next.speaker, next.text);
+  } else {
+    document.getElementById('dialog-box').style.display = 'none';
+  }
+}
+
+function queueDialog(speaker, text) {
+  if (!gs.dialog) {
+    showDialog(speaker, text);
+  } else {
+    gs.dialogQueue.push({ speaker, text });
+  }
+}
+
+// ─── INVENTORY ────────────────────────────────────────────────────────────────
+function normalizeId(id) {
+  return id === 'screwdriver_behind' ? 'screwdriver' : id;
+}
+
+function addItem(itemId) {
+  const nid = normalizeId(itemId);
+  if (!gs.inventory.includes(nid)) {
+    gs.inventory.push(nid);
+    updateInventoryUI();
+    const msg = ITEM_MSGS[itemId] || ITEM_MSGS[nid] || `Picked up: ${ITEM_NAMES[nid] || nid}`;
+    queueDialog('✅ ITEM FOUND', msg);
+  }
+}
+
+function hasItem(id) {
+  return gs.inventory.includes(normalizeId(id));
+}
+
+function updateInventoryUI() {
+  const el = document.getElementById('inv-items');
+  if (gs.inventory.length === 0) {
+    el.innerHTML = '<span style="color:#4a7a9b;font-style:italic">empty</span>';
+    return;
+  }
+  el.innerHTML = gs.inventory.map(id =>
+    `<span class="inv-item">${ITEM_NAMES[id] || id}</span>`
+  ).join('');
+}
+
+// ─── FLOOR ITEMS ─────────────────────────────────────────────────────────────
+// Spawn a visible pickup on the floor. Player walks near + presses E to collect.
+function spawnFloorItem(id, tx, ty) {
+  const nid = normalizeId(id);
+  if (!gs.inventory.includes(nid) && !floorItems.find(f => normalizeId(f.id) === nid)) {
+    floorItems.push({ id, x: tx * TILE + TILE/2, y: ty * TILE + TILE/2, collected: false });
+  }
+}
+
+function checkFloorItemPickup() {
+  const px = gs.player.x + TILE/2;
+  const py = gs.player.y + TILE/2;
+  for (const fi of floorItems) {
+    if (fi.collected) continue;
+    const dx = px - fi.x;
+    const dy = py - fi.y;
+    if (Math.sqrt(dx*dx + dy*dy) < TILE * 1.2) {
+      // Auto-collect on proximity
+      fi.collected = true;
+      addItem(fi.id);
+    }
+  }
+}
+
+function drawFloorItems() {
+  const t = Date.now();
+  for (const fi of floorItems) {
+    if (fi.collected) continue;
+    const bounce = Math.sin(t / 350) * 4;
+    const glow   = 0.5 + Math.sin(t / 250) * 0.3;
+    const nid = normalizeId(fi.id);
+
+    // Outer glow ring
+    ctx.save();
+    ctx.globalAlpha = glow * 0.5;
+    ctx.fillStyle = '#f5c842';
+    ctx.beginPath();
+    ctx.arc(fi.x, fi.y + bounce, 14, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // Inner bright circle
+    ctx.save();
+    ctx.globalAlpha = 0.9;
+    ctx.fillStyle = '#1a1000';
+    ctx.beginPath();
+    ctx.arc(fi.x, fi.y + bounce, 10, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // Icon
+    ctx.save();
+    ctx.globalAlpha = 1;
+    ctx.font = 'bold 13px monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const icon = (nid === 'key_fragment' || nid === 'master_key') ? '🔑'
+               : (nid === 'screwdriver') ? '🔧'
+               : '📝';
+    ctx.fillText(icon, fi.x, fi.y + bounce);
+    ctx.restore();
+
+    // Label above
+    ctx.save();
+    ctx.globalAlpha = glow;
+    ctx.fillStyle = '#f5c842';
+    ctx.font = 'bold 7px monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText(ITEM_NAMES[nid] || nid, fi.x, fi.y + bounce - 14);
+    ctx.restore();
+  }
+}
+
+// ─── COLLISION ────────────────────────────────────────────────────────────────
+function isSolid(tx, ty) {
+  if (tx < 0 || tx >= COLS || ty < 0 || ty >= ROWS) return true;
+  const t = MAP_TILES[ty][tx];
+  if (t === 'W') return true;
+  // check objects
+  for (const obj of gs.objects) {
+    if (!obj.solid) continue;
+    if (tx >= obj.x && tx < obj.x + obj.w && ty >= obj.y && ty < obj.y + obj.h) return true;
+  }
+  return false;
+}
+
+function playerTileX() { return Math.floor((gs.player.x + TILE/2) / TILE); }
+function playerTileY() { return Math.floor((gs.player.y + TILE/2) / TILE); }
+
+function canMoveTo(nx, ny) {
+  // Check all 4 corners of the player sprite (slightly inset)
+  const inset = 4;
+  const corners = [
+    [nx + inset, ny + inset],
+    [nx + TILE - inset - 1, ny + inset],
+    [nx + inset, ny + TILE - inset - 1],
+    [nx + TILE - inset - 1, ny + TILE - inset - 1],
+  ];
+  for (const [cx, cy] of corners) {
+    const tx = Math.floor(cx / TILE);
+    const ty = Math.floor(cy / TILE);
+    if (isSolid(tx, ty)) return false;
+  }
+  return true;
+}
+
+// ─── INTERACT ────────────────────────────────────────────────────────────────
+function interact() {
+  if (gs.puzzleMode) return;
+  if (gs.dialog) { dismissDialog(); return; }
+
+  const px = playerTileX();
+  const py = playerTileY();
+
+  // Pick up floor items first (highest priority)
+  for (const fi of floorItems) {
+    if (fi.collected) continue;
+    const fix = Math.floor(fi.x / TILE);
+    const fiy = Math.floor(fi.y / TILE);
+    if (Math.abs(px - fix) <= 2 && Math.abs(py - fiy) <= 2) {
+      fi.collected = true;
+      addItem(fi.id);
+      return;
+    }
+  }
+
+  // Find closest interactable object (range 3 tiles manhattan)
+  let closest = null;
+  let closestDist = 999;
+  for (const obj of gs.objects) {
+    const ox = obj.x + obj.w / 2;
+    const oy = obj.y + obj.h / 2;
+    const dist = Math.abs(px - ox) + Math.abs(py - oy);
+    const range = obj.interactRange || 3;
+    if (dist <= range && dist < closestDist) {
+      closestDist = dist;
+      closest = obj;
+    }
+  }
+
+  if (!closest) {
+    showDialog('JADEN', "Nothing to interact with nearby. Walk closer to an object and press E.");
+    return;
+  }
+
+  handleObjectInteract(closest);
+}
+
+function handleObjectInteract(obj) {
+  switch (obj.type) {
+
+    case 'door':
+      if (obj.state !== 'locked') break;
+      if (hasItem('master_key') && hasItem('key_fragment')) {
+        obj.state = 'open';
+        gs.dialogQueue = [];
+        showDialog('🎉 ESCAPE!', 'Jaden slots the key fragment into the master key — CLICK — the deadbolt slides back! The door bursts open! FREEDOM!');
+        gs.gameOver = true;
+        gs.won = true;
+        setTimeout(() => {
+          document.getElementById('win-screen').style.display = 'flex';
+        }, 2500);
+      } else {
+        const missing = [];
+        if (!hasItem('key_fragment')) missing.push('Key Fragment');
+        if (!hasItem('master_key'))  missing.push('Master Key');
+        showDialog('🔒 LOCKED DOOR', `Still locked! You need: ${missing.join(' + ')}. Keep looking!`);
+      }
+      break;
+
+    case 'npc': {
+      const d = obj.dialogs[obj.dialogIndex % obj.dialogs.length];
+      const colon = d.indexOf(':');
+      const speaker = d.slice(0, colon).trim();
+      const text = d.slice(colon + 1).trim().replace(/^"|"$/g, '');
+      showDialog(speaker, text);
+      obj.dialogIndex++;
+      break;
+    }
+
+    case 'deco':
+      if (obj.hasItem && !obj.itemCollected) {
+        obj.itemCollected = true;
+        // Spawn as visible floor item just in front of the object
+        const spawnX = Math.min(obj.x + Math.floor(obj.w / 2), COLS - 2);
+        const spawnY = Math.min(obj.y + obj.h, ROWS - 2);
+        spawnFloorItem(obj.hasItem, spawnX, spawnY);
+        showDialog(obj.label.toUpperCase(), obj.msg + '\n\n[Walk over the glowing item to pick it up!]');
+      } else {
+        showDialog(obj.label.toUpperCase(), obj.msg || 'Nothing unusual.');
+      }
+      break;
+
+    case 'clue':
+      obj.examined = true;
+      showDialog(obj.label.toUpperCase(), obj.msg);
+      break;
+
+    case 'puzzle':
+      handlePuzzle(obj);
+      break;
+  }
+}
+
+function handlePuzzle(obj) {
+  // Already open — try to hand out item if still available
+  if (obj.state === 'open') {
+    if (obj.hasItem && !obj.itemCollected) {
+      obj.itemCollected = true;
+      spawnFloorItem(obj.hasItem, obj.x + Math.floor(obj.w/2), obj.y + obj.h);
+      showDialog(obj.label.toUpperCase(), 'The item fell out! Walk over it to pick it up.');
+    } else {
+      showDialog(obj.label.toUpperCase(), 'Already open — nothing left inside.');
+    }
+    return;
+  }
+
+  if (obj.id === 'drawer') {
+    startPuzzle(obj, 'number', 'LOCKED DRAWER — Enter the 3-digit cabin number:');
+  } else if (obj.id === 'safe') {
+    startPuzzle(obj, 'word', 'WALL SAFE — Enter the 4-letter city name (where are you anchored?):');
+  } else if (obj.id === 'vent') {
+    if (!hasItem('screwdriver')) {
+      showDialog('AIR VENT', 'The vent has 4 screws. You need a screwdriver to open it.');
+      return;
+    }
+    obj.state = 'open';
+    obj.itemCollected = true;
+    spawnFloorItem('vent_note', obj.x + 1, obj.y + 1);
+    showDialog('AIR VENT', 'You unscrew the vent cover with the screwdriver. A note falls out — walk over it to grab it!');
+  }
+}
+
+// ─── PUZZLE ───────────────────────────────────────────────────────────────────
+let puzzleObj  = null;
+let puzzleType = '';
+
+function startPuzzle(obj, type, promptText) {
+  puzzleObj  = obj;
+  puzzleType = type;
+  gs.puzzleMode  = true;
+  gs.puzzleInput = '';
+  gs.dialog = { speaker: '🔢 ENTER CODE', text: '' }; // mark dialog as active so movement stops
+
+  const box = document.getElementById('dialog-box');
+  box.style.display = 'block';
+  document.getElementById('dialog-speaker').textContent = '🔢 ENTER CODE';
+  document.getElementById('dialog-text').textContent = promptText + '\n\nType then press ENTER  |  Input: _';
+  document.querySelector('#dialog-box .dismiss').textContent = '[ENTER = submit   ESC = cancel]';
+}
+
+function updatePuzzleDisplay() {
+  document.getElementById('dialog-text').textContent =
+    (puzzleType === 'number'
+      ? 'LOCKED DRAWER — Enter the 3-digit cabin number:\n\nType then press ENTER  |  Input: '
+      : 'WALL SAFE — Enter the 4-letter city name:\n\nType then press ENTER  |  Input: ')
+    + (gs.puzzleInput || '_');
+}
+
+function puzzleKeyPress(key) {
+  if (!gs.puzzleMode) return;
+
+  if (key === 'Escape') {
+    gs.puzzleMode = false;
+    gs.dialog = null;
+    puzzleObj = null;
+    document.getElementById('dialog-box').style.display = 'none';
+    return;
+  }
+
+  if (key === 'Enter') {
+    submitPuzzle();
+    return;
+  }
+
+  if (key === 'Backspace') {
+    gs.puzzleInput = gs.puzzleInput.slice(0, -1);
+  } else if (key.length === 1) {
+    if (puzzleType === 'number' && /\d/.test(key) && gs.puzzleInput.length < 3) {
+      gs.puzzleInput += key;
+    } else if (puzzleType === 'word' && /[a-zA-Z]/.test(key) && gs.puzzleInput.length < 6) {
+      gs.puzzleInput += key.toLowerCase();
+    }
+  }
+
+  updatePuzzleDisplay();
+}
+
+function submitPuzzle() {
+  const input        = gs.puzzleInput.trim();
+  const expectedRaw  = puzzleObj.code;
+  const inputNorm    = input.replace(/-/g, '');
+  const expectedNorm = expectedRaw.replace(/-/g, '');
+
+  if (inputNorm === expectedNorm) {
+    // ── SUCCESS ──
+    // Capture everything BEFORE nullifying puzzleObj
+    const solvedObj  = puzzleObj;
+    const pendingItem = solvedObj.hasItem && !solvedObj.itemCollected ? solvedObj.hasItem : null;
+    const label      = solvedObj.label;
+
+    solvedObj.state = 'open';
+    if (pendingItem) solvedObj.itemCollected = true;
+
+    // Clear puzzle mode and dialog together
+    gs.puzzleMode = false;
+    gs.dialog     = null;
+    gs.dialogQueue = [];
+    puzzleObj     = null;
+
+    // Restore dismiss text
+    document.querySelector('#dialog-box .dismiss').textContent = '[SPACE or E to dismiss]';
+
+    // Show success message then spawn item
+    showDialog('✅ UNLOCKED!', `The ${label} clicks open!`);
+
+    if (pendingItem) {
+      const spawnX = Math.min(solvedObj.x + Math.floor(solvedObj.w / 2), COLS - 2);
+      const spawnY = Math.min(solvedObj.y + solvedObj.h, ROWS - 2);
+      spawnFloorItem(pendingItem, spawnX, spawnY);
+      gs.dialogQueue.push({
+        speaker: '⬇ ITEM DROPPED',
+        text: `${ITEM_NAMES[normalizeId(pendingItem)] || pendingItem} appeared on the floor! Walk over it to pick it up!`
+      });
+    }
+  } else {
+    // ── WRONG ──
+    gs.puzzleInput = '';
+    document.getElementById('dialog-text').textContent =
+      `❌ Wrong! Try again.\n\nType then press ENTER  |  Input: _`;
+  }
+}
+
+// ─── INPUT ────────────────────────────────────────────────────────────────────
+const SPEED = 2;
+
+document.addEventListener('keydown', (e) => {
+  if (gs.puzzleMode) {
+    e.preventDefault();
+    puzzleKeyPress(e.key);
+    return;
+  }
+
+  gs.keys[e.key] = true;
+
+  if (e.key === 'e' || e.key === 'E') {
+    if (gs.interactCooldown <= 0) {
+      interact();
+      gs.interactCooldown = 20;
+    }
+  }
+  if (e.key === ' ') {
+    e.preventDefault();
+    dismissDialog();
+  }
+  if (e.key === 'i' || e.key === 'I') {
+    if (gs.inventory.length === 0) {
+      showDialog('INVENTORY', 'Your pockets are empty. Find some items!');
+    } else {
+      const items = gs.inventory.map(id => ITEM_NAMES[id] || id).join(', ');
+      showDialog('INVENTORY', `You're carrying: ${items}`);
+    }
+  }
+
+  // Prevent page scroll
+  if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key)) {
+    e.preventDefault();
+  }
+});
+
+document.addEventListener('keyup', (e) => {
+  gs.keys[e.key] = false;
+});
+
+// ─── MOVEMENT ─────────────────────────────────────────────────────────────────
+function movePlayer() {
+  if (gs.gameOver || gs.dialog || gs.puzzleMode) return;
+
+  const left  = gs.keys['a'] || gs.keys['A'] || gs.keys['ArrowLeft'];
+  const right = gs.keys['d'] || gs.keys['D'] || gs.keys['ArrowRight'];
+  const up    = gs.keys['w'] || gs.keys['W'] || gs.keys['ArrowUp'];
+  const down  = gs.keys['s'] || gs.keys['S'] || gs.keys['ArrowDown'];
+
+  let dx = 0, dy = 0;
+  if (left)  { dx -= SPEED; gs.player.dir = 'left'; }
+  if (right) { dx += SPEED; gs.player.dir = 'right'; }
+  if (up)    { dy -= SPEED; gs.player.dir = 'up'; }
+  if (down)  { dy += SPEED; gs.player.dir = 'down'; }
+
+  if (dx !== 0 || dy !== 0) gs.stepFrame++;
+
+  const nx = gs.player.x + dx;
+  const ny = gs.player.y + dy;
+
+  if (dx !== 0 && canMoveTo(nx, gs.player.y)) gs.player.x = nx;
+  if (dy !== 0 && canMoveTo(gs.player.x, ny)) gs.player.y = ny;
+
+  gs.player.x = Math.max(0, Math.min(gs.player.x, (COLS - 1) * TILE));
+  gs.player.y = Math.max(0, Math.min(gs.player.y, (ROWS - 1) * TILE));
+
+  if (gs.interactCooldown > 0) gs.interactCooldown--;
+
+  // Auto-collect floor items on contact
+  checkFloorItemPickup();
+}
+
+// ─── DRAWING ──────────────────────────────────────────────────────────────────
+function drawRect(x, y, w, h, color) {
+  ctx.fillStyle = color;
+  ctx.fillRect(x, y, w, h);
+}
+
+function drawTile(tx, ty, color) {
+  drawRect(tx * TILE, ty * TILE, TILE, TILE, color);
+}
+
+function drawFloor() {
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      const t = MAP_TILES[row][col];
+      if (t === 'W') {
+        drawTile(col, row, C.wall);
+        // wall detail
+        ctx.fillStyle = C.wallTop;
+        ctx.fillRect(col*TILE, row*TILE, TILE, 4);
+      } else {
+        // checkerboard carpet
+        const alt = (row + col) % 2 === 0;
+        drawTile(col, row, alt ? C.carpet : C.carpetDk);
+      }
+    }
+  }
+  // rug in center
+  ctx.fillStyle = C.rug;
+  ctx.globalAlpha = 0.35;
+  ctx.fillRect(6*TILE, 4*TILE, 8*TILE, 5*TILE);
+  ctx.globalAlpha = 1;
+}
+
+function drawObjects() {
+  for (const obj of gs.objects) {
+    const x = obj.x * TILE;
+    const y = obj.y * TILE;
+    const w = obj.w * TILE;
+    const h = obj.h * TILE;
+
+    switch (obj.id) {
+      case 'door':
+        // Door frame
+        ctx.fillStyle = obj.state === 'locked' ? C.doorLk : '#3a8a3a';
+        ctx.fillRect(x, y, w, h);
+        ctx.fillStyle = C.doorFr;
+        ctx.fillRect(x+2, y+2, w-4, h-4);
+        // Door knob
+        ctx.fillStyle = obj.state === 'locked' ? '#cc4444' : '#44cc44';
+        ctx.beginPath();
+        ctx.arc(x + w/2, y + h - 8, 4, 0, Math.PI*2);
+        ctx.fill();
+        // Label
+        ctx.fillStyle = '#fff';
+        ctx.font = '7px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(obj.state === 'locked' ? '🔒EXIT' : '🚪OPEN', x+w/2, y+h/2+3);
+        break;
+
+      case 'bed_j':
+      case 'bed_k':
+        // Bed frame
+        ctx.fillStyle = C.bed;
+        ctx.fillRect(x, y, w, h);
+        // Sheet
+        ctx.fillStyle = C.bedSheet;
+        ctx.fillRect(x+2, y+2, w-4, h-10);
+        // Pillow
+        ctx.fillStyle = obj.id === 'bed_j' ? '#d47070' : '#70a070';
+        ctx.fillRect(x+4, y+4, w-8, 8);
+        // Item glow pulse
+        if (obj.hasItem && !obj.itemCollected) {
+          const pulse = 0.5 + Math.sin(Date.now()/300) * 0.4;
+          ctx.save();
+          ctx.globalAlpha = pulse;
+          ctx.fillStyle = '#f5c842';
+          ctx.font = 'bold 14px monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText('❗', x+w/2, y+h/2+6);
+          ctx.restore();
+          ctx.fillStyle = '#f5c842';
+          ctx.font = '7px monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText('ITEM INSIDE', x+w/2, y+h+10);
+        }
+        break;
+
+      case 'desk':
+        ctx.fillStyle = C.desk;
+        ctx.fillRect(x, y, w, h);
+        ctx.fillStyle = '#7a5a30';
+        ctx.fillRect(x+2, y+2, w-4, 6);
+        break;
+
+      case 'drawer':
+        ctx.fillStyle = obj.state === 'locked' ? '#4a3020' : '#5a7a4a';
+        ctx.fillRect(x, y, w, h);
+        ctx.fillStyle = obj.state === 'locked' ? '#cc5555' : '#55cc55';
+        ctx.fillRect(x+w/2-4, y+2, 8, 4);
+        if (obj.state === 'locked') {
+          ctx.fillStyle = '#cc5555';
+          ctx.font = '7px monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText('🔒 CODE:714', x+w/2, y+h+10);
+        }
+        break;
+
+      case 'safe':
+        ctx.fillStyle = C.safe;
+        ctx.fillRect(x, y, w, h);
+        ctx.fillStyle = obj.state === 'locked' ? '#5a1a1a' : '#1a5a1a';
+        ctx.fillRect(x+4, y+4, w-8, h-8);
+        ctx.fillStyle = obj.state === 'locked' ? '#cc4444' : '#44cc44';
+        ctx.beginPath();
+        ctx.arc(x+w-8, y+h/2, 5, 0, Math.PI*2);
+        ctx.fill();
+        if (obj.state === 'locked') {
+          ctx.fillStyle = '#cc5555';
+          ctx.font = '7px monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText('🔒 SAFE', x+w/2, y+h+10);
+        }
+        break;
+
+      case 'painting':
+        ctx.fillStyle = C.painting;
+        ctx.fillRect(x, y, w, h);
+        ctx.fillStyle = '#7ab3d4';
+        ctx.fillRect(x+3, y+3, w-6, h-6);
+        ctx.fillStyle = '#d4a843';
+        ctx.fillRect(x+4, y+h-8, w-8, 4);
+        break;
+
+      case 'porthole':
+        ctx.fillStyle = C.porthFr;
+        ctx.beginPath();
+        ctx.arc(x+w/2, y+h/2, w/2-2, 0, Math.PI*2);
+        ctx.fill();
+        ctx.fillStyle = C.porthole;
+        ctx.beginPath();
+        ctx.arc(x+w/2, y+h/2, w/2-5, 0, Math.PI*2);
+        ctx.fill();
+        // sun glint
+        ctx.fillStyle = 'rgba(255,255,180,0.5)';
+        ctx.beginPath();
+        ctx.arc(x+w/2-5, y+h/2-5, 5, 0, Math.PI*2);
+        ctx.fill();
+        break;
+
+      case 'nightstand':
+        ctx.fillStyle = C.nightst;
+        ctx.fillRect(x, y, w, h);
+        ctx.fillStyle = C.lamp;
+        ctx.fillRect(x+w/2-3, y+2, 6, 10);
+        ctx.fillStyle = 'rgba(255,220,100,0.3)';
+        ctx.beginPath();
+        ctx.arc(x+w/2, y+4, 10, 0, Math.PI*2);
+        ctx.fill();
+        break;
+
+      case 'bookshelf':
+        ctx.fillStyle = '#3a2a1a';
+        ctx.fillRect(x, y, w, h);
+        for (let i = 0; i < 6; i++) {
+          ctx.fillStyle = ['#8a3a3a','#3a5a8a','#3a8a3a','#8a6a3a','#6a3a8a','#8a8a3a'][i];
+          ctx.fillRect(x+4+i*10, y+4, 8, h-8);
+        }
+        break;
+
+      case 'plant':
+        ctx.fillStyle = C.plantPot;
+        ctx.fillRect(x+w/4, y+h/2, w/2, h/2);
+        ctx.fillStyle = C.plant;
+        ctx.fillRect(x+w/2-3, y+4, 6, h/2);
+        ctx.fillRect(x+4, y+h/4, w-8, 6);
+        if (obj.hasItem && !obj.itemCollected) {
+          const pulse2 = 0.5 + Math.sin(Date.now()/300) * 0.4;
+          ctx.save(); ctx.globalAlpha = pulse2;
+          ctx.fillStyle = '#f5c842';
+          ctx.font = 'bold 11px monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText('❗', x+w/2, y+h-2);
+          ctx.restore();
+        }
+        break;
+
+      case 'fridge':
+        ctx.fillStyle = '#3a3a5a';
+        ctx.fillRect(x, y, w, h);
+        ctx.fillStyle = '#5a5a8a';
+        ctx.fillRect(x+2, y+2, w-4, h/2-4);
+        ctx.fillStyle = '#3a3a6a';
+        ctx.fillRect(x+2, y+h/2, w-4, h/2-4);
+        if (obj.hasItem && !obj.itemCollected) {
+          const pulse3 = 0.5 + Math.sin(Date.now()/300) * 0.4;
+          ctx.save(); ctx.globalAlpha = pulse3;
+          ctx.fillStyle = '#f5c842';
+          ctx.font = 'bold 11px monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText('❗', x+w/2, y-6);
+          ctx.font = '7px monospace';
+          ctx.fillText('ITEM INSIDE', x+w/2, y-14);
+          ctx.restore();
+        }
+        break;
+
+      case 'vent':
+        ctx.fillStyle = obj.state === 'open' ? '#5a7a5a' : '#5a5a5a';
+        ctx.fillRect(x, y, w, h);
+        if (obj.state !== 'open') {
+          ctx.fillStyle = '#3a3a3a';
+          for (let i = 0; i < 3; i++) {
+            ctx.fillRect(x+4, y+4+i*8, w-8, 3);
+          }
+        }
+        if (obj.hasItem && !obj.itemCollected && obj.state === 'open') {
+          ctx.fillStyle = C.interact;
+          ctx.font = '10px monospace';
+          ctx.textAlign = 'center';
+          ctx.fillText('✦', x+w/2, y+h/2+4);
+        }
+        break;
+
+      case 'klayton':
+        drawCharacter(x, y, 'klayton');
+        break;
+    }
+  }
+}
+
+function drawCharacter(x, y, type) {
+  const bounce = Math.sin(Date.now() / 300) * 1;
+
+  if (type === 'klayton') {
+    // Body
+    ctx.fillStyle = C.klayShirt;
+    ctx.fillRect(x+8, y+14+bounce, 16, 14);
+    // Head
+    ctx.fillStyle = C.klayton;
+    ctx.fillRect(x+10, y+5+bounce, 12, 10);
+    // Hair (PA guy — dark)
+    ctx.fillStyle = '#2a1a0a';
+    ctx.fillRect(x+10, y+5+bounce, 12, 4);
+    // Eyes
+    ctx.fillStyle = '#000';
+    ctx.fillRect(x+12, y+9+bounce, 2, 2);
+    ctx.fillRect(x+18, y+9+bounce, 2, 2);
+    // Pants
+    ctx.fillStyle = '#2a3a5a';
+    ctx.fillRect(x+8, y+28+bounce, 7, 5);
+    ctx.fillRect(x+17, y+28+bounce, 7, 5);
+    // Label
+    ctx.fillStyle = '#7ab3d4';
+    ctx.font = '7px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('KLAYTON', x+16, y+bounce-2);
+    ctx.fillStyle = '#4a5a8a';
+    ctx.font = '6px monospace';
+    ctx.fillText('(PA)', x+16, y+bounce+4);
+  }
+}
+
+function drawPlayer() {
+  const px = gs.player.x;
+  const py = gs.player.y;
+  const dir = gs.player.dir;
+  const walk = Math.floor(gs.stepFrame / 8) % 2;
+
+  // Shadow
+  ctx.fillStyle = C.shadow;
+  ctx.beginPath();
+  ctx.ellipse(px+TILE/2, py+TILE-4, 10, 4, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  // Body (Jaden — Louisiana guy)
+  ctx.fillStyle = '#c84a4a'; // Red shirt (LSU colors)
+  ctx.fillRect(px+8, py+14, 16, 14);
+
+  // Head
+  ctx.fillStyle = C.jaden;
+  ctx.fillRect(px+9, py+4, 14, 12);
+
+  // Hat (Louisiana / cowboy-ish)
+  ctx.fillStyle = C.jadenHat;
+  ctx.fillRect(px+7, py+2, 18, 4);
+  ctx.fillRect(px+10, py-2, 12, 6);
+
+  // Eyes
+  ctx.fillStyle = '#1a0a00';
+  if (dir === 'left') {
+    ctx.fillRect(px+10, py+9, 2, 2);
+    ctx.fillRect(px+14, py+9, 2, 2);
+  } else if (dir === 'right') {
+    ctx.fillRect(px+16, py+9, 2, 2);
+    ctx.fillRect(px+20, py+9, 2, 2);
+  } else {
+    ctx.fillRect(px+12, py+9, 2, 2);
+    ctx.fillRect(px+18, py+9, 2, 2);
+  }
+
+  // Pants (dark blue jeans)
+  ctx.fillStyle = '#2a3060';
+  const legOffset = walk ? 2 : 0;
+  ctx.fillRect(px+8, py+28, 7, 5 + (walk ? -legOffset : legOffset));
+  ctx.fillRect(px+17, py+28, 7, 5 + (walk ? legOffset : -legOffset));
+
+  // Boots
+  ctx.fillStyle = '#4a2a10';
+  ctx.fillRect(px+7, py+31 + (walk ? -legOffset : legOffset), 9, 3);
+  ctx.fillRect(px+16, py+31 + (walk ? legOffset : -legOffset), 9, 3);
+
+  // Name label
+  ctx.fillStyle = '#f5c842';
+  ctx.font = 'bold 7px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('JADEN', px+TILE/2, py-2);
+  ctx.fillStyle = '#c8a040';
+  ctx.font = '6px monospace';
+  ctx.fillText('(LA)', px+TILE/2, py+4);
+}
+
+function drawInteractPrompt() {
+  const px = playerTileX();
+  const py = playerTileY();
+
+  // Check floor items first
+  for (const fi of floorItems) {
+    if (fi.collected) continue;
+    const fix = Math.floor(fi.x / TILE);
+    const fiy = Math.floor(fi.y / TILE);
+    if (Math.abs(px - fix) <= 2 && Math.abs(py - fiy) <= 2) {
+      // Already auto-collected via proximity — no extra prompt needed
+      return;
+    }
+  }
+
+  let nearObj = null;
+  let nearDist = 999;
+  for (const obj of gs.objects) {
+    const ox = obj.x + obj.w / 2;
+    const oy = obj.y + obj.h / 2;
+    const dist = Math.abs(px - ox) + Math.abs(py - oy);
+    const range = obj.interactRange || 3;
+    if (dist <= range && dist < nearDist) {
+      nearDist = dist;
+      nearObj = obj;
+    }
+  }
+
+  if (nearObj) {
+    const ox = nearObj.x * TILE + (nearObj.w * TILE) / 2;
+    const oy = Math.max(nearObj.y * TILE - 8, 8);
+    // Background pill
+    ctx.fillStyle = 'rgba(0,0,0,0.7)';
+    const label = '[E] ' + nearObj.label;
+    ctx.font = 'bold 9px monospace';
+    const tw = ctx.measureText(label).width;
+    ctx.fillRect(ox - tw/2 - 5, oy - 10, tw + 10, 14);
+    ctx.fillStyle = C.interact;
+    ctx.textAlign = 'center';
+    ctx.fillText(label, ox, oy);
+  }
+}
+
+function drawHints() {
+  const hasFrag = hasItem('key_fragment');
+  const hasMast = hasItem('master_key');
+  const lines = [
+    `🔑 Key Fragment: ${hasFrag ? '✅ GOT IT' : '❌ missing'}`,
+    `🗝 Master Key:   ${hasMast ? '✅ GOT IT' : '❌ missing'}`,
+    hasFrag && hasMast ? '→ Go to the EXIT DOOR!' : '',
+  ].filter(Boolean);
+
+  const bw = 160, bh = lines.length * 13 + 10;
+  ctx.fillStyle = 'rgba(0,0,0,0.75)';
+  ctx.fillRect(W - bw - 4, 4, bw, bh);
+  ctx.font = '8px monospace';
+  ctx.textAlign = 'left';
+  lines.forEach((line, i) => {
+    ctx.fillStyle = line.includes('✅') ? '#66ee66'
+                  : line.includes('❌') ? '#ee6666'
+                  : '#f5c842';
+    ctx.fillText(line, W - bw, 17 + i * 13);
+  });
+}
+
+// ─── MAIN LOOP ────────────────────────────────────────────────────────────────
+function render(timestamp) {
+  const dt = Math.min((timestamp - lastTime) / 1000, 0.05);
+  lastTime = timestamp;
+
+  if (!gs.gameOver) updateTimer(dt);
+  movePlayer();
+
+  ctx.clearRect(0, 0, W, H);
+  drawFloor();
+  drawObjects();
+  drawFloorItems();
+  drawPlayer();
+  drawInteractPrompt();
+  drawHints();
+
+  // Draw "CABO" visible through porthole flicker
+  const pObj = gs.objects.find(o => o.id === 'porthole');
+  if (pObj) {
+    const px2 = pObj.x * TILE + TILE/2;
+    const py2 = pObj.y * TILE + TILE;
+    ctx.save();
+    ctx.globalAlpha = 0.3 + Math.sin(Date.now()/800)*0.1;
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 6px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('🌊CABO', px2, py2 + 14);
+    ctx.restore();
+  }
+
+  requestAnimationFrame(render);
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+document.getElementById('start-btn').addEventListener('click', () => {
+  document.getElementById('title-screen').style.display = 'none';
+  document.getElementById('game-wrapper').style.display = 'flex';
+
+  // Opening dialog queue
+  setTimeout(() => {
+    showDialog('JADEN LEGER (Louisiana)', '"What the— the door\'s locked! Klayton, we gotta get out of here! The camel ride starts in 15 minutes!"');
+    gs.dialogQueue.push({ speaker: 'KLAYTON ROGERS (Pennsylvania)', text: '"Dude I JUST woke up. But yeah... something\'s blocking the door from outside. We gotta find a way out!"' });
+    gs.dialogQueue.push({ speaker: 'HINT', text: 'Use WASD to move. Press E near objects to interact. Look around the room for clues — you need to find both KEY PIECES to escape!' });
+  }, 300);
+
+  lastTime = performance.now();
+  requestAnimationFrame(render);
+});
+</script>
+</body>
+</html>
