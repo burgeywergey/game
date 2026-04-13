@@ -327,10 +327,13 @@ const OBJECTS_INIT = [
     msg:"A nightstand with a lamp and a cruise schedule. The excursion boards at 9:15 AM. It's 9:00 AM now!",
     hasItem:null },
 
-  // === BOOKSHELF (back wall center) ===
-  { id:'bookshelf', x:9, y:2, w:3, h:2, solid:true, type:'clue', label:'Bookshelf',
-    msg:'A shelf of travel books. One is titled "Louisiana Gumbo & Pennsylvania Pretzels". A sticky note inside reads: "Cabin # = drawer code"',
-    examined:false },
+  // === BOOKSHELF (back wall center — pushable!) ===
+  { id:'bookshelf', x:9, y:2, w:3, h:2, solid:true, type:'bookshelf', label:'Bookshelf',
+    state:'normal', examined:false, interactRange:3 },
+
+  // === SECRET PASSAGE (hidden behind bookshelf, revealed after push) ===
+  { id:'secret_passage', x:9, y:0, w:3, h:3, solid:true, type:'secret_passage',
+    label:'Secret Passage', state:'hidden', interactRange:3 },
 
   // === PLANT (corner) ===
   { id:'plant', x:18, y:9, w:1, h:1, solid:true, type:'deco', label:'Tropical Plant',
@@ -354,6 +357,7 @@ const OBJECTS_INIT = [
       "Klayton: \"The safe on the wall... I saw the maid punch in a word when she dropped off towels. It was the city name. CABO.\"",
       "Klayton: \"Bro if we miss these camels I'm gonna be so upset. I've been talking about this for months.\"",
       "Klayton: \"Check under my mattress — I hid the key fragment there before we went to dinner last night.\"",
+      "Klayton: \"Hey... that bookshelf by the back wall looks weird. Like it's not actually attached. Maybe we can PUSH it?\"",
     ],
     dialogIndex:0 },
 ];
@@ -678,10 +682,59 @@ function handleObjectInteract(obj) {
       showDialog(obj.label.toUpperCase(), obj.msg);
       break;
 
+    case 'bookshelf':
+      handleBookshelf(obj);
+      break;
+
+    case 'secret_passage':
+      if (obj.state === 'open') {
+        gs.dialogQueue = [];
+        showDialog('🕳 SECRET PASSAGE', 'Jaden dives headfirst into the crawlspace — Klayton right behind him. They pop out on the other side of the cabin wall and sprint for the gangway!');
+        gs.gameOver = true;
+        gs.won = true;
+        setTimeout(() => {
+          document.getElementById('win-screen').style.display = 'flex';
+        }, 2500);
+      }
+      break;
+
     case 'puzzle':
       handlePuzzle(obj);
       break;
   }
+}
+
+function handleBookshelf(obj) {
+  if (obj.state === 'pushed') {
+    showDialog('BOOKSHELF', 'The bookshelf is already pushed aside. The secret passage is open behind it!');
+    return;
+  }
+  if (!obj.examined) {
+    obj.examined = true;
+    showDialog('📚 BOOKSHELF', 'A shelf crammed with travel books — "Louisiana Gumbo & Pennsylvania Pretzels", a Cabo guide, a sticky note: "Cabin # = drawer code". But wait... this shelf feels oddly loose from the wall. Like it could be PUSHED aside. Interact again to push it!');
+    return;
+  }
+  // Push it!
+  obj.state = 'pushed';
+  obj.solid = false;
+  obj.x = 13; // slide right
+
+  // Open the secret passage object
+  const passage = gs.objects.find(o => o.id === 'secret_passage');
+  if (passage) {
+    passage.state = 'open';
+    passage.solid = false;
+  }
+
+  // Open the wall tiles so player can walk through
+  MAP_TILES[0][9]  = '.';
+  MAP_TILES[0][10] = '.';
+  MAP_TILES[0][11] = '.';
+  MAP_TILES[1][9]  = '.';
+  MAP_TILES[1][10] = '.';
+  MAP_TILES[1][11] = '.';
+
+  showDialog('💥 BOOKSHELF PUSHED!', 'Jaden and Klayton heave the bookshelf sideways — it scrapes across the floor revealing a dark CRAWLSPACE cut into the wall! Fresh sea air rushes in. This is the way out! Walk into the passage to escape!');
 }
 
 function handlePuzzle(obj) {
@@ -884,6 +937,24 @@ function movePlayer() {
 
   // Auto-collect floor items on contact
   checkFloorItemPickup();
+
+  // Check if player walked into the secret passage
+  if (!gs.gameOver) {
+    const passage = gs.objects.find(o => o.id === 'secret_passage');
+    if (passage && passage.state === 'open') {
+      const ptx = playerTileX();
+      const pty = playerTileY();
+      if (ptx >= 9 && ptx <= 11 && pty <= 1) {
+        gs.gameOver = true;
+        gs.won = true;
+        gs.dialogQueue = [];
+        showDialog('🎉 ESCAPED!', 'Jaden and Klayton crawl through the passage and burst out onto the ship deck. The camel caravan is just loading up. THEY MADE IT!');
+        setTimeout(() => {
+          document.getElementById('win-screen').style.display = 'flex';
+        }, 2500);
+      }
+    }
+  }
 }
 
 // ─── DRAWING ──────────────────────────────────────────────────────────────────
@@ -1046,14 +1117,65 @@ function drawObjects() {
         ctx.fill();
         break;
 
-      case 'bookshelf':
+      case 'bookshelf': {
+        // Draw at current (possibly moved) position
+        const bx = obj.x * TILE;
+        const by = obj.y * TILE;
+        const bw = obj.w * TILE;
+        const bh = obj.h * TILE;
         ctx.fillStyle = '#3a2a1a';
-        ctx.fillRect(x, y, w, h);
+        ctx.fillRect(bx, by, bw, bh);
         for (let i = 0; i < 6; i++) {
           ctx.fillStyle = ['#8a3a3a','#3a5a8a','#3a8a3a','#8a6a3a','#6a3a8a','#8a8a3a'][i];
-          ctx.fillRect(x+4+i*10, y+4, 8, h-8);
+          ctx.fillRect(bx+4+i*10, by+4, 8, bh-8);
+        }
+        if (obj.state === 'normal') {
+          // Hint sparkle if examined
+          if (obj.examined) {
+            const pulse = 0.5 + Math.sin(Date.now()/350)*0.4;
+            ctx.save(); ctx.globalAlpha = pulse;
+            ctx.fillStyle = '#f5c842';
+            ctx.font = 'bold 8px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('← PUSH →', bx+bw/2, by+bh+11);
+            ctx.restore();
+          }
+        } else {
+          // Pushed — draw scrape marks on old floor
+          ctx.fillStyle = 'rgba(0,0,0,0.3)';
+          ctx.fillRect(9*TILE, 2*TILE, 3*TILE, 4);
         }
         break;
+      }
+
+      case 'secret_passage': {
+        if (obj.state !== 'open') break;
+        // Draw dark crawlspace opening in the wall
+        const px2 = obj.x * TILE;
+        const py2 = obj.y * TILE;
+        const pw  = obj.w * TILE;
+        const ph  = obj.h * TILE;
+        // Dark tunnel
+        ctx.fillStyle = '#050810';
+        ctx.fillRect(px2, py2, pw, ph);
+        // Tunnel border glow
+        const glow = 0.4 + Math.sin(Date.now()/400)*0.3;
+        ctx.save();
+        ctx.globalAlpha = glow;
+        ctx.strokeStyle = '#7ab3d4';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(px2+2, py2+2, pw-4, ph-4);
+        ctx.restore();
+        // Arrow pointing into tunnel
+        ctx.save();
+        ctx.globalAlpha = 0.6 + Math.sin(Date.now()/300)*0.3;
+        ctx.fillStyle = '#f5c842';
+        ctx.font = 'bold 10px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('▲ ESCAPE ▲', px2+pw/2, py2+ph/2+4);
+        ctx.restore();
+        break;
+      }
 
       case 'plant':
         ctx.fillStyle = C.plantPot;
@@ -1253,10 +1375,13 @@ function drawInteractPrompt() {
 function drawHints() {
   const hasFrag = hasItem('key_fragment');
   const hasMast = hasItem('master_key');
+  const bookshelf = gs.objects.find(o => o.id === 'bookshelf');
+  const passageOpen = bookshelf && bookshelf.state === 'pushed';
   const lines = [
     `🔑 Key Fragment: ${hasFrag ? '✅ GOT IT' : '❌ missing'}`,
     `🗝 Master Key:   ${hasMast ? '✅ GOT IT' : '❌ missing'}`,
-    hasFrag && hasMast ? '→ Go to the EXIT DOOR!' : '',
+    `📚 Bookshelf:    ${passageOpen ? '✅ PUSHED' : '❌ not pushed'}`,
+    hasFrag && hasMast ? '→ Use EXIT DOOR to escape!' : passageOpen ? '→ Crawl through PASSAGE!' : '',
   ].filter(Boolean);
 
   const bw = 160, bh = lines.length * 13 + 10;
