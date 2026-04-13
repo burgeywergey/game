@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Solar Energy Ad Generator</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0f0f0f; color: #fff; font-family: 'Segoe UI', sans-serif; padding: 20px; }
+  h1 { text-align: center; margin: 20px 0 8px; color: #FFB800; font-size: 28px; }
+  p.sub { text-align: center; color: #aaa; margin-bottom: 24px; }
+  .controls { text-align: center; margin-bottom: 30px; }
+  .controls button {
+    background: #FFB800; color: #000; border: none; padding: 14px 36px;
+    font-size: 18px; font-weight: 700; border-radius: 8px; cursor: pointer;
+    margin: 6px; transition: transform 0.1s;
+  }
+  .controls button:hover { transform: scale(1.04); }
+  .controls button.secondary {
+    background: #222; color: #FFB800; border: 1px solid #FFB800; font-size: 14px; padding: 10px 22px;
+  }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 20px; }
+  .ad-card { background: #1a1a1a; border-radius: 10px; overflow: hidden; border: 1px solid #333; }
+  .ad-card h3 { padding: 10px 14px; font-size: 13px; color: #999; border-bottom: 1px solid #333; }
+  .ad-card canvas { display: block; width: 100%; height: auto; }
+  .ad-card .dl-btn {
+    display: block; width: calc(100% - 20px); margin: 10px; padding: 8px;
+    background: #222; color: #FFB800; border: 1px solid #444; border-radius: 5px;
+    cursor: pointer; font-size: 12px; text-align: center;
+  }
+  .ad-card .dl-btn:hover { background: #2a2a2a; }
+  #status { text-align: center; margin: 10px; color: #4CAF50; font-weight: bold; font-size: 16px; min-height: 24px; }
+</style>
+</head>
+<body>
+<h1>☀️ Solar Energy Ad Generator</h1>
+<p class="sub">20 sales-focused photo ads — click to download all as PNG files</p>
+<div class="controls">
+  <button onclick="downloadAll()">⬇ Download All 20 PNGs</button>
+  <button class="secondary" onclick="renderAll()">↺ Re-render Previews</button>
+</div>
+<div id="status"></div>
+<div class="grid" id="grid"></div>
+
+<script>
+const ads = [
+  // --- SQUARE 1080x1080 ---
+  {
+    id: 1, name: "Sunrise Power – Square", w: 1080, h: 1080,
+    render(ctx, w, h) {
+      // Deep orange-to-yellow sunrise gradient bg
+      const bg = ctx.createLinearGradient(0, 0, 0, h);
+      bg.addColorStop(0, '#0a1628');
+      bg.addColorStop(0.45, '#c45200');
+      bg.addColorStop(0.7, '#FF8C00');
+      bg.addColorStop(1, '#FFD700');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, w, h);
+
+      // Sun glow
+      drawSunGlow(ctx, w/2, h*0.55, 320, '#FFD700', '#FF6B00');
+
+      // Sun rays
+      drawSunRays(ctx, w/2, h*0.55, 300, 380, 16, 'rgba(255,220,80,0.25)');
+
+      // House silhouette with panels
+      drawHouseWithPanels(ctx, w/2, h*0.72, 440, 260, '#0a1628');
+
+      // Headline
+      ctx.save();
+      ctx.shadowColor = 'rgba(0,0,0,0.8)';
+      ctx.shadowBlur = 20;
+      drawText(ctx, 'CUT YOUR', w/2, 120, 700, 96, '#FFFFFF', 'bold', 'center');
+      drawText(ctx, 'ENERGY BILL', w/2, 220, 700, 96, '#FFD700', 'bold', 'center');
+      drawText(ctx, 'BY 50%', w/2, 320, 700, 110, '#FFFFFF', '900', 'center');
+      ctx.restore();
+
+      // CTA badge
+      drawBadge(ctx, w/2, h*0.9, 380, 70, '#FF6B00', '#FFFFFF', 'GET A FREE QUOTE TODAY', 28);
+    }
+  },
+  {
+    id: 2, name: "Clean Energy Bold – Square", w: 1080, h: 1080,
+    render(ctx, w, h) {
+      // Deep blue sky
+      const bg = ctx.createLinearGradient(0, 0, 0, h);
+      bg.addColorStop(0, '#001f6b');
+      bg.addColorStop(0.6, '#0057d9');
+      bg.addColorStop(1, '#00c6ff');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, w, h);
+
+      // White cloud shapes
+      drawClouds(ctx, w, h);
+
+      // Solar panel array
+      drawPanelArray(ctx, 80, h*0.48, w-160, 280, 4, 8);
+
+      // Overlay gradient for readability
+      const over = ctx.createLinearGradient(0, 0, 0, h*0.45);
+      over.addColorStop(0, 'rgba(0,10,60,0.75)');
+      over.addColorStop(1, 'rgba(0,10,60,0)');
+      ctx.fillStyle = over;
+      ctx.fillRect(0, 0, w, h*0.45);
+
+      drawText(ctx, 'ZERO DOWN.', w/2, 140, 800, 90, '#FFFFFF', 'bold', 'center');
+      drawText(ctx, 'INSTANT SAVINGS.', w/2, 245, 800, 76, '#7EE8FA', 'bold', 'center');
+      drawText(ctx, 'Go solar with $0 upfront — save from day one.', w/2, 320, 800, 34, '#ddeeff', '400', 'center');
+
+      drawBadge(ctx, w/2, h*0.9, 400, 72, '#0057d9', '#FFD700', '⚡ INSTALL THIS MONTH', 30);
+    }
+  },
+  {
+    id: 3, name: "Green Earth Premium – Square", w: 1080, h: 1080,
+    render(ctx, w, h) {
+      ctx.fillStyle = '#0d1f0d';
+      ctx.fillRect(0, 0, w, h);
+
+      // Radial green glow
+      const glow = ctx.createRadialGradient(w/2, h/2, 50, w/2, h/2, 600);
+      glow.addColorStop(0, 'rgba(34,197,94,0.22)');
+      glow.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = glow;
+      ctx.fillRect(0, 0, w, h);
+
+      // Earth circle
+      drawEarth(ctx, w/2, h*0.52, 260);
+
+      // Gold badge top
+      drawRoundRect(ctx, w/2 - 220, 30, 440, 60, 8, '#22c55e');
+      drawText(ctx, '✅ CERTIFIED INSTALLER', w/2, 68, 400, 28, '#FFFFFF', 'bold', 'center');
+
+      drawText(ctx, 'POWER YOUR HOME', w/2, 180, 860, 76, '#FFFFFF', 'bold', 'center');
+      drawText(ctx, 'WITH THE SUN', w/2, 265, 860, 76, '#4ADE80', 'bold', 'center');
+
+      drawText(ctx, 'Clean. Affordable. Yours.', w/2, 335, 600, 38, '#86efac', '300', 'center');
+
+      drawBadge(ctx, w/2, h - 80, 440, 72, '#22c55e', '#000000', 'ORDER YOUR SYSTEM TODAY', 28);
+    }
+  },
+  {
+    id: 4, name: "Dark Premium – Square", w: 1080, h: 1080,
+    render(ctx, w, h) {
+      ctx.fillStyle = '#080808';
+      ctx.fillRect(0, 0, w, h);
+
+      // Gold horizontal rule accent
+      ctx.fillStyle = '#FFD700';
+      ctx.fillRect(0, h*0.48, w, 3);
+
+      // Sleek panel render
+      drawSleekPanels(ctx, 60, h*0.5, w-120, h*0.35);
+
+      // Top section
+      drawText(ctx, 'ELITE SOLAR', w/2, 100, 800, 96, '#FFFFFF', '900', 'center');
+      drawText(ctx, 'SYSTEMS', w/2, 210, 800, 96, '#FFD700', '900', 'center');
+
+      const line1 = ctx.createLinearGradient(0, 260, w, 260);
+      line1.addColorStop(0, 'transparent'); line1.addColorStop(0.5, '#FFD700'); line1.addColorStop(1, 'transparent');
+      ctx.strokeStyle = line1; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(100, 270); ctx.lineTo(w-100, 270); ctx.stroke();
+
+      drawText(ctx, 'Premium performance. Lifetime warranty.', w/2, 320, 800, 36, '#aaaaaa', '300', 'center');
+
+      drawBadge(ctx, w/2, h - 80, 420, 72, '#FFD700', '#000000', '★ REQUEST A FREE QUOTE', 28);
+    }
+  },
+  {
+    id: 5, name: "Split Stats – Square", w: 1080, h: 1080,
+    render(ctx, w, h) {
+      // Left half orange, right half white
+      ctx.fillStyle = '#FF6B00';
+      ctx.fillRect(0, 0, w/2, h);
+      ctx.fillStyle = '#F5F5F5';
+      ctx.fillRect(w/2, 0, w/2, h);
+
+      drawText(ctx, 'WHY', 270, 140, 460, 100, '#FFFFFF', '900', 'center');
+      drawText(ctx, 'SOLAR?', 270, 250, 460, 100, '#FFD700', '900', 'center');
+
+      // Stats on right
+      const stats = [
+        { val: '50%', label: 'Bill Reduction' },
+        { val: '$0', label: 'Down Payment' },
+        { val: '25yr', label: 'Warranty' },
+        { val: '3x', label: 'Home Value Boost' },
+      ];
+      stats.forEach((s, i) => {
+        const y = 160 + i * 220;
+        drawText(ctx, s.val, w*0.75, y, 400, 88, '#FF6B00', '900', 'center');
+        drawText(ctx, s.label, w*0.75, y + 85, 400, 34, '#555555', '600', 'center');
+        if (i < stats.length - 1) {
+          ctx.strokeStyle = '#dddddd'; ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.moveTo(w/2 + 40, y + 130); ctx.lineTo(w - 40, y + 130); ctx.stroke();
+        }
+      });
+
+      // Sun icon on left
+      drawSunIcon(ctx, 270, h*0.62, 130);
+      drawBadge(ctx, 270, h - 80, 380, 68, '#FFFFFF', '#FF6B00', 'CLAIM YOUR DEAL', 28);
+    }
+  },
+  // --- WIDE 1200x628 (Facebook/OG) ---
+  {
+    id: 6, name: "Facebook Hero – Wide", w: 1200, h: 628,
+    render(ctx, w, h) {
+      const bg = ctx.createLinearGradient(0, 0, w, h);
+      bg.addColorStop(0, '#FF6B00');
+      bg.addColorStop(0.5, '#FF9500');
+      bg.addColorStop(1, '#FFD700');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, w, h);
+
+      drawSunRays(ctx, w*0.72, h*0.5, 200, 300, 18, 'rgba(255,255,200,0.18)');
+      drawSunGlow(ctx, w*0.72, h*0.5, 180, '#FFE066', '#FF9500');
+
+      // Left text
+      drawText(ctx, 'Go Solar.', 60, 140, 600, 96, '#FFFFFF', '900', 'left');
+      drawText(ctx, 'Save Thousands.', 60, 248, 600, 72, '#fff0c0', 'bold', 'left');
+      drawText(ctx, 'Average homeowner saves $1,400/year.', 60, 318, 600, 32, '#FFFFFF', '400', 'left');
+      drawText(ctx, 'No hidden fees. Licensed installers.', 60, 360, 600, 32, '#FFFFFF', '400', 'left');
+
+      drawBadge(ctx, 230, h - 80, 380, 64, '#FFFFFF', '#FF6B00', '➜ GET FREE QUOTE', 28);
+    }
+  },
+  {
+    id: 7, name: "Navy Savings – Wide", w: 1200, h: 628,
+    render(ctx, w, h) {
+      ctx.fillStyle = '#0a1628';
+      ctx.fillRect(0, 0, w, h);
+
+      // Right panel graphic
+      drawPanelArray(ctx, w*0.55, 40, w*0.42, h - 80, 3, 5);
+
+      // Accent stripe
+      ctx.fillStyle = '#FFD700';
+      ctx.fillRect(0, 0, 8, h);
+
+      drawText(ctx, 'SWITCH TO SOLAR', 50, 120, 550, 70, '#FFFFFF', '900', 'left');
+      drawText(ctx, 'PAY $0 TODAY', 50, 210, 550, 80, '#FFD700', '900', 'left');
+
+      ctx.strokeStyle = 'rgba(255,215,0,0.3)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(50, 235); ctx.lineTo(550, 235); ctx.stroke();
+
+      drawText(ctx, '✓ Federal tax credits up to 30%', 60, 280, 500, 30, '#aaccff', '400', 'left');
+      drawText(ctx, '✓ Install in as little as 1 day', 60, 322, 500, 30, '#aaccff', '400', 'left');
+      drawText(ctx, '✓ 25-year performance guarantee', 60, 364, 500, 30, '#aaccff', '400', 'left');
+      drawText(ctx, '✓ Increase your home value', 60, 406, 500, 30, '#aaccff', '400', 'left');
+
+      drawBadge(ctx, 200, h - 75, 360, 62, '#FFD700', '#000000', 'SHOP PACKAGES NOW', 26);
+    }
+  },
+  {
+    id: 8, name: "Sky Split CTA – Wide", w: 1200, h: 628,
+    render(ctx, w, h) {
+      // Sky blue background
+      const bg = ctx.createLinearGradient(0, 0, 0, h);
+      bg.addColorStop(0, '#87CEEB');
+      bg.addColorStop(1, '#E0F4FF');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, w, h);
+
+      // White panel on left
+      drawRoundRect(ctx, 40, 40, w*0.52 - 60, h - 80, 16, '#FFFFFF');
+
+      // Dark right side
+      ctx.fillStyle = '#0a1628';
+      ctx.fillRect(w*0.52, 0, w*0.48, h);
+
+      drawText(ctx, 'LIMITED', w*0.76, 120, 500, 72, '#FFD700', '900', 'center');
+      drawText(ctx, 'TIME OFFER', w*0.76, 205, 500, 58, '#FFFFFF', '900', 'center');
+      drawText(ctx, 'Free installation', w*0.76, 280, 500, 38, '#aaccff', 'bold', 'center');
+      drawText(ctx, 'this month only', w*0.76, 325, 500, 38, '#aaccff', 'bold', 'center');
+      drawBadge(ctx, w*0.76, h - 90, 340, 64, '#FF6B00', '#FFFFFF', 'CLAIM OFFER ➜', 26);
+
+      // Left side content
+      drawSunIcon(ctx, 200, 200, 100);
+      drawText(ctx, 'Solar Made', 200, 320, 460, 50, '#0a1628', '900', 'center');
+      drawText(ctx, 'Simple.', 200, 378, 460, 50, '#FF6B00', '900', 'center');
+      drawText(ctx, 'Affordable. Clean. Fast.', 200, 430, 460, 28, '#444', '400', 'center');
+    }
+  },
+  {
+    id: 9, name: "Green ROI – Wide", w: 1200, h: 628,
+    render(ctx, w, h) {
+      ctx.fillStyle = '#052e16';
+      ctx.fillRect(0, 0, w, h);
+
+      const glow = ctx.createRadialGradient(w*0.65, h*0.5, 20, w*0.65, h*0.5, 400);
+      glow.addColorStop(0, 'rgba(34,197,94,0.25)');
+      glow.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = glow;
+      ctx.fillRect(0, 0, w, h);
+
+      // ROI counter graphic
+      drawROIGauge(ctx, w*0.72, h*0.48, 200);
+
+      drawText(ctx, 'YOUR SOLAR', 50, 130, 540, 78, '#FFFFFF', '900', 'left');
+      drawText(ctx, 'PAYS FOR ITSELF', 50, 220, 540, 66, '#4ADE80', '900', 'left');
+      drawText(ctx, 'in under 6 years', 50, 295, 540, 44, '#86efac', '600', 'left');
+
+      ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(50, 330); ctx.lineTo(480, 330); ctx.stroke();
+
+      drawText(ctx, 'Then enjoy decades of FREE electricity.', 50, 375, 540, 30, '#a3e4bc', '400', 'left');
+      drawText(ctx, 'See your personalized savings report.', 50, 415, 540, 30, '#a3e4bc', '400', 'left');
+
+      drawBadge(ctx, 200, h - 80, 380, 64, '#22c55e', '#000000', '📊 GET MY SAVINGS REPORT', 24);
+    }
+  },
+  {
+    id: 10, name: "Urgency Red – Wide", w: 1200, h: 628,
+    render(ctx, w, h) {
+      ctx.fillStyle = '#1a0000';
+      ctx.fillRect(0, 0, w, h);
+      ctx.fillStyle = '#cc0000';
+      ctx.fillRect(0, h - 100, w, 100);
+
+      drawSunRays(ctx, w*0.7, h*0.4, 150, 250, 20, 'rgba(255,100,50,0.18)');
+      drawSunGlow(ctx, w*0.7, h*0.4, 160, '#FF4500', '#cc0000');
+
+      drawText(ctx, '⚠ PRICES RISING IN 2025', 50, 90, 600, 40, '#FF6666', 'bold', 'left');
+      ctx.strokeStyle = '#cc0000'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(50, 110); ctx.lineTo(580, 110); ctx.stroke();
+
+      drawText(ctx, 'LOCK IN YOUR', 50, 200, 600, 84, '#FFFFFF', '900', 'left');
+      drawText(ctx, 'LOW RATE NOW', 50, 298, 600, 84, '#FF6B00', '900', 'left');
+
+      drawText(ctx, 'Solar prices won\'t stay this low. Act today and', 50, 380, 580, 30, '#ffaaaa', '400', 'left');
+      drawText(ctx, 'lock in the best installation rate of the year.', 50, 415, 580, 30, '#ffaaaa', '400', 'left');
+
+      drawText(ctx, '⚡ SECURE YOUR PRICE TODAY', w*0.5 + 70, h - 50, 460, 32, '#FFFFFF', '900', 'center');
+    }
+  },
+  // --- STORY 1080x1920 ---
+  {
+    id: 11, name: "Sunrise Story – Tall", w: 1080, h: 1920,
+    render(ctx, w, h) {
+      const bg = ctx.createLinearGradient(0, 0, 0, h);
+      bg.addColorStop(0, '#0a0510');
+      bg.addColorStop(0.3, '#220066');
+      bg.addColorStop(0.55, '#c45200');
+      bg.addColorStop(0.72, '#FF8C00');
+      bg.addColorStop(1, '#FFD700');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, w, h);
+
+      drawSunRays(ctx, w/2, h*0.5, 350, 500, 20, 'rgba(255,180,0,0.15)');
+      drawSunGlow(ctx, w/2, h*0.5, 280, '#FFD700', '#FF8C00');
+      drawHouseWithPanels(ctx, w/2, h*0.64, 600, 340, '#0a0510');
+
+      drawText(ctx, '☀', w/2, 140, 600, 120, '#FFD700', 'bold', 'center');
+      drawText(ctx, 'SOLAR ENERGY', w/2, 280, 800, 90, '#FFFFFF', '900', 'center');
+      drawText(ctx, 'FOR YOUR HOME', w/2, 380, 800, 78, '#FFD700', '900', 'center');
+
+      drawText(ctx, 'Start saving today.', w/2, 480, 700, 44, '#ffe9aa', '300', 'center');
+      drawText(ctx, 'Zero out-of-pocket costs.', w/2, 535, 700, 44, '#ffe9aa', '300', 'center');
+
+      // Feature pills
+      ['30% Federal Tax Credit', 'Same-Day Install Available', '25-Year Warranty'].forEach((t, i) => {
+        drawPill(ctx, w/2, h*0.82 + i * 100, 560, 64, 'rgba(255,255,255,0.15)', '#FFFFFF', t, 30);
+      });
+
+      drawBadge(ctx, w/2, h - 100, 520, 80, '#FF6B00', '#FFFFFF', '➜ GET FREE QUOTE NOW', 32);
+    }
+  },
+  {
+    id: 12, name: "Blue Night Story – Tall", w: 1080, h: 1920,
+    render(ctx, w, h) {
+      const bg = ctx.createLinearGradient(0, 0, 0, h);
+      bg.addColorStop(0, '#000d2e');
+      bg.addColorStop(0.5, '#001f6b');
+      bg.addColorStop(1, '#0057d9');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, w, h);
+
+      // Stars
+      drawStars(ctx, w, h*0.5, 60);
+
+      // Big electricity bolt
+      drawBolt(ctx, w/2, h*0.38, 180, 360, '#FFD700');
+
+      drawText(ctx, 'POWER UP', w/2, 120, 800, 100, '#FFFFFF', '900', 'center');
+      drawText(ctx, 'YOUR HOME', w/2, 230, 800, 100, '#7EE8FA', '900', 'center');
+
+      drawText(ctx, 'Switch to solar and slash your', w/2, 360, 700, 40, '#aaccff', '400', 'center');
+      drawText(ctx, 'monthly electric bill in half.', w/2, 410, 700, 40, '#aaccff', '400', 'center');
+
+      drawPanelArray(ctx, 80, h*0.6, w - 160, 300, 3, 6);
+
+      // 3-step process
+      const steps = ['1. Free Consultation', '2. Same-Day Install', '3. Start Saving'];
+      steps.forEach((s, i) => {
+        drawText(ctx, s, w/2, h*0.82 + i * 90, 700, 38, '#FFFFFF', 'bold', 'center');
+      });
+
+      drawBadge(ctx, w/2, h - 110, 520, 80, '#0057d9', '#FFD700', '⚡ BOOK FREE CONSULT', 32);
+    }
+  },
+  {
+    id: 13, name: "Green Eco Story – Tall", w: 1080, h: 1920,
+    render(ctx, w, h) {
+      ctx.fillStyle = '#071a07';
+      ctx.fillRect(0, 0, w, h);
+
+      const glow = ctx.createRadialGradient(w/2, h*0.45, 30, w/2, h*0.45, 700);
+      glow.addColorStop(0, 'rgba(34,197,94,0.3)');
+      glow.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = glow;
+      ctx.fillRect(0, 0, w, h);
+
+      drawEarth(ctx, w/2, h*0.42, 300);
+      drawSunIcon(ctx, w/2, h*0.18, 120);
+
+      drawText(ctx, 'CLEAN ENERGY', w/2, 660, 900, 82, '#FFFFFF', '900', 'center');
+      drawText(ctx, 'FOR A BETTER', w/2, 756, 900, 82, '#4ADE80', '900', 'center');
+      drawText(ctx, 'TOMORROW', w/2, 852, 900, 82, '#FFFFFF', '900', 'center');
+
+      drawText(ctx, 'Reduce your carbon footprint and', w/2, 960, 700, 38, '#86efac', '300', 'center');
+      drawText(ctx, 'your electric bill at the same time.', w/2, 1010, 700, 38, '#86efac', '300', 'center');
+
+      const perks = ['🌱 100% Clean Energy', '💰 Save $1,400+/Year', '🏡 Increase Home Value', '♻️ 25yr Panel Warranty'];
+      perks.forEach((p, i) => {
+        drawPill(ctx, w/2, h*0.6 + 700 + i * 105, 640, 72, 'rgba(34,197,94,0.2)', '#86efac', p, 32);
+      });
+
+      drawBadge(ctx, w/2, h - 110, 560, 82, '#22c55e', '#000000', '🌞 ORDER YOUR SOLAR NOW', 30);
+    }
+  },
+  {
+    id: 14, name: "Minimal White Story – Tall", w: 1080, h: 1920,
+    render(ctx, w, h) {
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, w, h);
+
+      // Top orange stripe
+      ctx.fillStyle = '#FF6B00';
+      ctx.fillRect(0, 0, w, 14);
+
+      // Big sun
+      drawSunGlow(ctx, w/2, h*0.3, 240, '#FFF0C0', '#FFD700');
+      drawSunIcon(ctx, w/2, h*0.3, 160);
+
+      drawText(ctx, 'Simple.', w/2, h*0.54, 800, 110, '#FF6B00', '900', 'center');
+      drawText(ctx, 'Affordable.', w/2, h*0.63, 800, 110, '#0a1628', '900', 'center');
+      drawText(ctx, 'Solar.', w/2, h*0.72, 800, 110, '#FF6B00', '900', 'center');
+
+      ctx.strokeStyle = '#eeeeee'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(100, h*0.77); ctx.lineTo(w-100, h*0.77); ctx.stroke();
+
+      drawText(ctx, 'Join 2 million homeowners who have', w/2, h*0.8, 800, 38, '#666', '400', 'center');
+      drawText(ctx, 'made the switch to clean solar power.', w/2, h*0.835, 800, 38, '#666', '400', 'center');
+      drawText(ctx, 'Financing as low as $79/mo.', w/2, h*0.875, 800, 44, '#FF6B00', 'bold', 'center');
+
+      drawBadge(ctx, w/2, h - 110, 560, 82, '#FF6B00', '#FFFFFF', 'START SAVING TODAY', 32);
+    }
+  },
+  {
+    id: 15, name: "Countdown Story – Tall", w: 1080, h: 1920,
+    render(ctx, w, h) {
+      const bg = ctx.createLinearGradient(0, 0, 0, h);
+      bg.addColorStop(0, '#1a0a00');
+      bg.addColorStop(0.5, '#5c1500');
+      bg.addColorStop(1, '#FF4500');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, w, h);
+
+      drawSunRays(ctx, w/2, h*0.3, 280, 420, 18, 'rgba(255,180,0,0.15)');
+      drawSunGlow(ctx, w/2, h*0.3, 220, '#FFAA00', '#FF4500');
+
+      drawText(ctx, '🔥 FLASH SALE', w/2, 120, 800, 64, '#FFD700', '900', 'center');
+      drawText(ctx, 'ENDS SOON', w/2, 196, 800, 64, '#FFFFFF', '900', 'center');
+
+      // Big discount
+      drawText(ctx, 'SAVE', w/2, h*0.52, 700, 90, '#FFFFFF', '900', 'center');
+      drawText(ctx, '$2,000', w/2, h*0.6, 700, 140, '#FFD700', '900', 'center');
+      drawText(ctx, 'on any solar install', w/2, h*0.68, 700, 52, '#ffccaa', '400', 'center');
+
+      // Countdown boxes
+      ['DAYS', 'HRS', 'MIN'].forEach((label, i) => {
+        const x = 160 + i * 280;
+        drawRoundRect(ctx, x - 100, h*0.75, 200, 200, 12, 'rgba(255,255,255,0.15)');
+        drawText(ctx, ['02', '14', '37'][i], x, h*0.75 + 110, 180, 88, '#FFD700', '900', 'center');
+        drawText(ctx, label, x, h*0.75 + 170, 180, 28, '#FFFFFF', '400', 'center');
+      });
+
+      drawBadge(ctx, w/2, h - 110, 580, 82, '#FF4500', '#FFFFFF', '🛒 CLAIM YOUR DISCOUNT', 32);
+    }
+  },
+  // --- SQUARE bonus 5 ---
+  {
+    id: 16, name: "Testimonial – Square", w: 1080, h: 1080,
+    render(ctx, w, h) {
+      const bg = ctx.createLinearGradient(0, 0, 0, h);
+      bg.addColorStop(0, '#1a1a2e');
+      bg.addColorStop(1, '#16213e');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, w, h);
+
+      // Quote mark
+      drawText(ctx, '\u201C', w/2, 160, 800, 220, 'rgba(255,215,0,0.25)', '900', 'center');
+
+      drawText(ctx, '"My bill went from $280', w/2, 340, 900, 52, '#FFFFFF', '400', 'center');
+      drawText(ctx, 'to $14 per month."', w/2, 405, 900, 52, '#FFFFFF', '400', 'center');
+
+      ctx.strokeStyle = '#FFD700'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(200, 450); ctx.lineTo(w-200, 450); ctx.stroke();
+
+      drawText(ctx, '— Maria T., Homeowner', w/2, 510, 700, 36, '#FFD700', '600', 'center');
+      drawText(ctx, '★★★★★', w/2, 568, 600, 52, '#FFD700', 'bold', 'center');
+
+      drawSunIcon(ctx, w/2, h*0.76, 110);
+      drawText(ctx, 'Your results could be even better.', w/2, h*0.87, 800, 36, '#aaccff', '300', 'center');
+      drawBadge(ctx, w/2, h - 70, 440, 70, '#FFD700', '#000000', 'GET MY FREE ESTIMATE', 28);
+    }
+  },
+  {
+    id: 17, name: "Tax Credit – Square", w: 1080, h: 1080,
+    render(ctx, w, h) {
+      ctx.fillStyle = '#003366';
+      ctx.fillRect(0, 0, w, h);
+
+      const glow = ctx.createRadialGradient(w/2, h*0.38, 20, w/2, h*0.38, 500);
+      glow.addColorStop(0, 'rgba(255,215,0,0.3)');
+      glow.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = glow;
+      ctx.fillRect(0, 0, w, h);
+
+      // Big % graphic
+      drawRoundRect(ctx, w/2 - 200, 80, 400, 400, 200, 'rgba(255,215,0,0.12)');
+      drawText(ctx, '30%', w/2, 330, 700, 200, '#FFD700', '900', 'center');
+      drawText(ctx, 'FEDERAL TAX CREDIT', w/2, 420, 800, 46, '#FFFFFF', 'bold', 'center');
+
+      ctx.strokeStyle = 'rgba(255,215,0,0.3)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(100, 456); ctx.lineTo(w-100, 456); ctx.stroke();
+
+      drawText(ctx, 'The government pays 30% of your', w/2, 520, 800, 40, '#aaccff', '400', 'center');
+      drawText(ctx, 'solar installation cost. Act before', w/2, 568, 800, 40, '#aaccff', '400', 'center');
+      drawText(ctx, 'the credit is reduced.', w/2, 616, 800, 40, '#aaccff', '400', 'center');
+
+      drawText(ctx, '⏰ Limited time — don\'t miss out', w/2, 696, 800, 36, '#FFD700', 'bold', 'center');
+
+      drawBadge(ctx, w/2, h - 80, 480, 72, '#FFD700', '#003366', 'MAXIMIZE YOUR SAVINGS', 28);
+    }
+  },
+  {
+    id: 18, name: "Before & After – Square", w: 1080, h: 1080,
+    render(ctx, w, h) {
+      // Left half (before) dark/red
+      const left = ctx.createLinearGradient(0, 0, w/2, h);
+      left.addColorStop(0, '#3d0000'); left.addColorStop(1, '#8b0000');
+      ctx.fillStyle = left;
+      ctx.fillRect(0, 0, w/2, h);
+
+      // Right half (after) bright
+      const right = ctx.createLinearGradient(w/2, 0, w, h);
+      right.addColorStop(0, '#FF8C00'); right.addColorStop(1, '#FFD700');
+      ctx.fillStyle = right;
+      ctx.fillRect(w/2, 0, w/2, h);
+
+      // Divider arrow
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath();
+      ctx.moveTo(w/2 - 40, h/2 - 50);
+      ctx.lineTo(w/2 + 40, h/2);
+      ctx.lineTo(w/2 - 40, h/2 + 50);
+      ctx.closePath();
+      ctx.fill();
+
+      // Before labels
+      drawText(ctx, 'BEFORE', w/4, 80, 400, 56, '#ff6666', '900', 'center');
+      drawText(ctx, '$280', w/4, 420, 400, 130, '#FFFFFF', '900', 'center');
+      drawText(ctx, '/month', w/4, 540, 400, 42, '#ffaaaa', '400', 'center');
+      drawText(ctx, 'avg electric bill', w/4, 596, 400, 30, '#ffaaaa', '400', 'center');
+
+      // After labels
+      drawText(ctx, 'AFTER', w*3/4, 80, 400, 56, '#003300', '900', 'center');
+      drawText(ctx, '$18', w*3/4, 420, 400, 130, '#FFFFFF', '900', 'center');
+      drawText(ctx, '/month', w*3/4, 540, 400, 42, '#003300', '400', 'center');
+      drawText(ctx, 'with solar panels', w*3/4, 596, 400, 30, '#003300', '400', 'center');
+
+      drawBadge(ctx, w/2, h - 80, 500, 72, '#FFFFFF', '#FF6B00', 'SEE YOUR SAVINGS NOW', 28);
+    }
+  },
+  {
+    id: 19, name: "Bundle Deal – Square", w: 1080, h: 1080,
+    render(ctx, w, h) {
+      ctx.fillStyle = '#0d0d0d';
+      ctx.fillRect(0, 0, w, h);
+
+      // Gold outline box
+      ctx.strokeStyle = '#FFD700'; ctx.lineWidth = 6;
+      roundedRectPath(ctx, 30, 30, w - 60, h - 60, 20);
+      ctx.stroke();
+
+      // BEST VALUE ribbon
+      ctx.save();
+      ctx.translate(w - 30, 30);
+      ctx.rotate(Math.PI/4);
+      ctx.fillStyle = '#FF6B00';
+      ctx.fillRect(-120, -14, 240, 28);
+      drawText(ctx, 'BEST VALUE', 0, 3, 200, 20, '#FFFFFF', 'bold', 'center');
+      ctx.restore();
+
+      drawText(ctx, 'SOLAR BUNDLE', w/2, 110, 900, 80, '#FFD700', '900', 'center');
+      drawText(ctx, 'PACKAGE DEAL', w/2, 200, 900, 80, '#FFFFFF', '900', 'center');
+
+      const items = [
+        '✦ 10 Premium Solar Panels',
+        '✦ Smart Inverter System',
+        '✦ Battery Backup Included',
+        '✦ 25-Year Warranty',
+        '✦ Free Professional Install',
+        '✦ 24/7 Monitoring App',
+      ];
+      items.forEach((item, i) => {
+        drawText(ctx, item, w/2, 330 + i * 82, 800, 36, i % 2 === 0 ? '#FFFFFF' : '#FFD700', 'bold', 'center');
+      });
+
+      // Price
+      drawText(ctx, 'All for just $79/mo', w/2, h - 180, 800, 52, '#FFFFFF', '900', 'center');
+      drawBadge(ctx, w/2, h - 80, 480, 70, '#FFD700', '#000000', '🔥 ORDER YOUR BUNDLE', 28);
+    }
+  },
+  {
+    id: 20, name: "Neighborhood FOMO – Square", w: 1080, h: 1080,
+    render(ctx, w, h) {
+      const bg = ctx.createLinearGradient(0, 0, 0, h);
+      bg.addColorStop(0, '#87CEEB');
+      bg.addColorStop(0.7, '#E0F4FF');
+      bg.addColorStop(1, '#C8E6C9');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, w, h);
+
+      // Row of houses
+      drawNeighborhood(ctx, w, h);
+
+      // Top overlay
+      const topOver = ctx.createLinearGradient(0, 0, 0, 300);
+      topOver.addColorStop(0, 'rgba(0,30,80,0.9)');
+      topOver.addColorStop(1, 'rgba(0,30,80,0)');
+      ctx.fillStyle = topOver;
+      ctx.fillRect(0, 0, w, 300);
+
+      drawText(ctx, 'YOUR NEIGHBORS', w/2, 90, 900, 68, '#FFFFFF', '900', 'center');
+      drawText(ctx, 'ARE SAVING WITH SOLAR', w/2, 172, 900, 56, '#FFD700', '900', 'center');
+      drawText(ctx, 'Are you?', w/2, 248, 900, 52, '#aaccff', '600', 'center');
+
+      // Bottom overlay
+      const botOver = ctx.createLinearGradient(0, h - 260, 0, h);
+      botOver.addColorStop(0, 'rgba(0,30,80,0)');
+      botOver.addColorStop(1, 'rgba(0,30,80,0.95)');
+      ctx.fillStyle = botOver;
+      ctx.fillRect(0, h - 260, w, 260);
+
+      drawText(ctx, 'Don\'t be the last on the block.', w/2, h - 190, 800, 40, '#aaccff', '400', 'center');
+      drawBadge(ctx, w/2, h - 80, 500, 70, '#FF6B00', '#FFFFFF', '🏡 GET MY SOLAR QUOTE', 28);
+    }
+  },
+];
+
+// ─── HELPER DRAWING FUNCTIONS ─────────────────────────────────────────────────
+
+function drawText(ctx, text, x, y, maxWidth, size, color, weight, align) {
+  ctx.save();
+  ctx.font = `${weight} ${size}px 'Segoe UI', Arial, sans-serif`;
+  ctx.fillStyle = color;
+  ctx.textAlign = align;
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, x, y, maxWidth);
+  ctx.restore();
+}
+
+function roundedRectPath(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function drawRoundRect(ctx, x, y, w, h, r, fill, stroke) {
+  ctx.save();
+  roundedRectPath(ctx, x, y, w, h, r);
+  if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+  if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 2; ctx.stroke(); }
+  ctx.restore();
+}
+
+function drawBadge(ctx, cx, cy, w, h, bg, fg, text, size) {
+  drawRoundRect(ctx, cx - w/2, cy - h/2, w, h, h/2, bg);
+  drawText(ctx, text, cx, cy, w - 20, size, fg, 'bold', 'center');
+}
+
+function drawPill(ctx, cx, cy, w, h, bg, fg, text, size) {
+  drawRoundRect(ctx, cx - w/2, cy - h/2, w, h, h/2, bg);
+  drawText(ctx, text, cx, cy, w - 20, size, fg, '600', 'center');
+}
+
+function drawSunGlow(ctx, cx, cy, r, innerColor, outerColor) {
+  const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+  g.addColorStop(0, innerColor);
+  g.addColorStop(0.5, outerColor);
+  g.addColorStop(1, 'transparent');
+  ctx.save();
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawSunRays(ctx, cx, cy, r1, r2, count, color) {
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 4;
+  for (let i = 0; i < count; i++) {
+    const a = (i / count) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.moveTo(cx + Math.cos(a) * r1, cy + Math.sin(a) * r1);
+    ctx.lineTo(cx + Math.cos(a) * r2, cy + Math.sin(a) * r2);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawSunIcon(ctx, cx, cy, r) {
+  ctx.save();
+  // Rays
+  ctx.strokeStyle = '#FFD700'; ctx.lineWidth = r * 0.08;
+  for (let i = 0; i < 12; i++) {
+    const a = (i / 12) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.moveTo(cx + Math.cos(a) * r * 1.2, cy + Math.sin(a) * r * 1.2);
+    ctx.lineTo(cx + Math.cos(a) * r * 1.6, cy + Math.sin(a) * r * 1.6);
+    ctx.stroke();
+  }
+  // Circle
+  ctx.fillStyle = '#FFD700';
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+}
+
+function drawHouseWithPanels(ctx, cx, cy, width, height, color) {
+  ctx.save();
+  ctx.fillStyle = color;
+  const x = cx - width/2, y = cy - height/2;
+  // Body
+  ctx.fillRect(x + width*0.15, y + height*0.4, width*0.7, height*0.6);
+  // Roof
+  ctx.beginPath();
+  ctx.moveTo(x, y + height*0.42);
+  ctx.lineTo(cx, y);
+  ctx.lineTo(x + width, y + height*0.42);
+  ctx.closePath();
+  ctx.fill();
+
+  // Panels on roof (gold)
+  ctx.save();
+  ctx.translate(cx, y + height*0.2);
+  ctx.rotate(-0.38);
+  const pw = width * 0.08, ph = width * 0.06;
+  for (let row = 0; row < 2; row++) {
+    for (let col = 0; col < 4; col++) {
+      const px = (col - 1.5) * (pw + 4);
+      const py = row * (ph + 4) - ph/2;
+      ctx.fillStyle = '#1a3a6e';
+      ctx.fillRect(px, py, pw, ph);
+      ctx.strokeStyle = '#FFD700';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(px, py, pw, ph);
+      ctx.beginPath();
+      ctx.moveTo(px + pw/2, py);
+      ctx.lineTo(px + pw/2, py + ph);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(px, py + ph/2);
+      ctx.lineTo(px + pw, py + ph/2);
+      ctx.stroke();
+    }
+  }
+  ctx.restore();
+  ctx.restore();
+}
+
+function drawPanelArray(ctx, x, y, w, h, rows, cols) {
+  ctx.save();
+  const padX = w * 0.02, padY = h * 0.04;
+  const cellW = (w - padX * (cols + 1)) / cols;
+  const cellH = (h - padY * (rows + 1)) / rows;
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const px = x + padX + c * (cellW + padX);
+      const py = y + padY + r * (cellH + padY);
+      // Panel bg
+      ctx.fillStyle = '#0d2a5c';
+      roundedRectPath(ctx, px, py, cellW, cellH, 4);
+      ctx.fill();
+      // Grid lines
+      ctx.strokeStyle = 'rgba(100,180,255,0.4)';
+      ctx.lineWidth = 1;
+      for (let cx2 = 1; cx2 < 4; cx2++) {
+        ctx.beginPath();
+        ctx.moveTo(px + cellW * cx2 / 4, py);
+        ctx.lineTo(px + cellW * cx2 / 4, py + cellH);
+        ctx.stroke();
+      }
+      for (let cy2 = 1; cy2 < 3; cy2++) {
+        ctx.beginPath();
+        ctx.moveTo(px, py + cellH * cy2 / 3);
+        ctx.lineTo(px + cellW, py + cellH * cy2 / 3);
+        ctx.stroke();
+      }
+      // Shine
+      const shine = ctx.createLinearGradient(px, py, px + cellW, py + cellH);
+      shine.addColorStop(0, 'rgba(255,255,255,0.08)');
+      shine.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = shine;
+      roundedRectPath(ctx, px, py, cellW, cellH, 4);
+      ctx.fill();
+      // Outline
+      ctx.strokeStyle = 'rgba(100,180,255,0.6)';
+      ctx.lineWidth = 1;
+      roundedRectPath(ctx, px, py, cellW, cellH, 4);
+      ctx.stroke();
+    }
+  }
+  ctx.restore();
+}
+
+function drawSleekPanels(ctx, x, y, w, h) {
+  drawPanelArray(ctx, x, y, w, h, 2, 6);
+}
+
+function drawEarth(ctx, cx, cy, r) {
+  ctx.save();
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  const g = ctx.createRadialGradient(cx - r*0.3, cy - r*0.3, 0, cx, cy, r);
+  g.addColorStop(0, '#4facde'); g.addColorStop(0.5, '#0066aa'); g.addColorStop(1, '#003366');
+  ctx.fillStyle = g; ctx.fill();
+  // Land masses
+  ctx.fillStyle = '#22c55e';
+  [[cx - r*0.3, cy - r*0.2, r*0.28], [cx + r*0.2, cy + r*0.1, r*0.22], [cx - r*0.1, cy + r*0.35, r*0.15]].forEach(([ex, ey, er]) => {
+    ctx.beginPath(); ctx.arc(ex, ey, er, 0, Math.PI*2); ctx.fill();
+  });
+  // Outline
+  ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
+  ctx.restore();
+}
+
+function drawROIGauge(ctx, cx, cy, r) {
+  ctx.save();
+  // Background arc
+  ctx.strokeStyle = 'rgba(255,255,255,0.1)'; ctx.lineWidth = 20;
+  ctx.beginPath(); ctx.arc(cx, cy, r, Math.PI * 0.75, Math.PI * 2.25); ctx.stroke();
+  // Fill arc (75%)
+  const g = ctx.createLinearGradient(cx - r, cy, cx + r, cy);
+  g.addColorStop(0, '#22c55e'); g.addColorStop(1, '#FFD700');
+  ctx.strokeStyle = g; ctx.lineWidth = 20;
+  ctx.beginPath(); ctx.arc(cx, cy, r, Math.PI * 0.75, Math.PI * 0.75 + Math.PI * 1.5 * 0.75); ctx.stroke();
+  drawText(ctx, 'ROI', cx, cy - 20, 200, 40, '#FFFFFF', 'bold', 'center');
+  drawText(ctx, '75%', cx, cy + 30, 200, 52, '#4ADE80', '900', 'center');
+  ctx.restore();
+}
+
+function drawBolt(ctx, cx, cy, w, h, color) {
+  ctx.save();
+  ctx.fillStyle = color;
+  ctx.shadowColor = color; ctx.shadowBlur = 40;
+  ctx.beginPath();
+  ctx.moveTo(cx + w * 0.3, cy - h * 0.5);
+  ctx.lineTo(cx - w * 0.1, cy);
+  ctx.lineTo(cx + w * 0.2, cy);
+  ctx.lineTo(cx - w * 0.3, cy + h * 0.5);
+  ctx.lineTo(cx + w * 0.1, cy);
+  ctx.lineTo(cx - w * 0.2, cy);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawClouds(ctx, w, h) {
+  ctx.save();
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  [[w*0.15, h*0.12, 90], [w*0.7, h*0.08, 70], [w*0.45, h*0.18, 60]].forEach(([x, y, r]) => {
+    [-r, 0, r].forEach(dx => {
+      ctx.beginPath(); ctx.arc(x + dx, y, r * 0.6, 0, Math.PI * 2); ctx.fill();
+    });
+  });
+  ctx.restore();
+}
+
+function drawStars(ctx, w, h, count) {
+  ctx.save();
+  ctx.fillStyle = 'rgba(255,255,255,0.8)';
+  for (let i = 0; i < count; i++) {
+    const x = Math.random() * w;
+    const y = Math.random() * h;
+    const r = Math.random() * 2 + 0.5;
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.restore();
+}
+
+function drawNeighborhood(ctx, w, h) {
+  ctx.save();
+  const houseCount = 5;
+  const houseW = w / houseCount;
+  for (let i = 0; i < houseCount; i++) {
+    const hx = i * houseW + houseW * 0.1;
+    const hy = h * 0.45;
+    const hw = houseW * 0.8;
+    const hh = h * 0.45;
+    // House body
+    ctx.fillStyle = ['#e8d5b7', '#d4c4a8', '#c8b89a', '#ddd0b8', '#e0d0bc'][i];
+    ctx.fillRect(hx + hw * 0.1, hy + hh * 0.35, hw * 0.8, hh * 0.65);
+    // Roof
+    ctx.fillStyle = ['#8B4513', '#6b3410', '#7a3d14', '#964816', '#5c2e0d'][i];
+    ctx.beginPath();
+    ctx.moveTo(hx, hy + hh * 0.37);
+    ctx.lineTo(hx + hw/2, hy);
+    ctx.lineTo(hx + hw, hy + hh * 0.37);
+    ctx.closePath(); ctx.fill();
+    // Solar panels (gold)
+    ctx.fillStyle = '#1a3a6e';
+    for (let p = 0; p < 3; p++) {
+      const px = hx + hw*0.2 + p * (hw*0.2);
+      ctx.fillRect(px, hy + hh*0.08, hw*0.15, hw*0.1);
+      ctx.strokeStyle = '#FFD700'; ctx.lineWidth = 1; ctx.strokeRect(px, hy + hh*0.08, hw*0.15, hw*0.1);
+    }
+    // Window
+    ctx.fillStyle = 'rgba(135,206,235,0.7)';
+    ctx.fillRect(hx + hw*0.35, hy + hh*0.5, hw*0.3, hw*0.25);
+    // Door
+    ctx.fillStyle = '#5a3a1a';
+    ctx.fillRect(hx + hw*0.4, hy + hh*0.75, hw*0.2, hw*0.25);
+  }
+  ctx.restore();
+}
+
+// ─── RENDER & DOWNLOAD ────────────────────────────────────────────────────────
+
+function renderAd(ad) {
+  const canvas = document.getElementById(`canvas-${ad.id}`);
+  canvas.width = ad.w;
+  canvas.height = ad.h;
+  const ctx = canvas.getContext('2d');
+  ad.render(ctx, ad.w, ad.h);
+  return canvas;
+}
+
+function renderAll() {
+  ads.forEach(ad => renderAd(ad));
+}
+
+function downloadCanvas(canvas, filename) {
+  const link = document.createElement('a');
+  link.download = filename;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+async function downloadAll() {
+  const btn = document.querySelector('.controls button');
+  btn.textContent = '⏳ Downloading...';
+  btn.disabled = true;
+  document.getElementById('status').textContent = 'Starting downloads...';
+  for (let i = 0; i < ads.length; i++) {
+    const ad = ads[i];
+    const canvas = document.getElementById(`canvas-${ad.id}`);
+    document.getElementById('status').textContent = `Downloading ad ${i+1} of ${ads.length}: ${ad.name}...`;
+    downloadCanvas(canvas, `solar-ad-${String(ad.id).padStart(2,'0')}-${ad.name.replace(/[^a-z0-9]/gi,'-').toLowerCase()}.png`);
+    await new Promise(r => setTimeout(r, 400));
+  }
+  document.getElementById('status').textContent = `✅ All ${ads.length} ads downloaded!`;
+  btn.textContent = '⬇ Download All 20 PNGs';
+  btn.disabled = false;
+}
+
+// ─── BUILD GRID ────────────────────────────────────────────────────────────────
+
+window.addEventListener('DOMContentLoaded', () => {
+  const grid = document.getElementById('grid');
+  ads.forEach(ad => {
+    const card = document.createElement('div');
+    card.className = 'ad-card';
+    card.innerHTML = `
+      <h3>Ad #${ad.id} — ${ad.name} (${ad.w}×${ad.h})</h3>
+      <canvas id="canvas-${ad.id}"></canvas>
+      <button class="dl-btn" onclick="downloadCanvas(document.getElementById('canvas-${ad.id}'), 'solar-ad-${ad.id}.png')">⬇ Download this ad</button>
+    `;
+    grid.appendChild(card);
+  });
+  renderAll();
+});
+</script>
+</body>
+</html>
