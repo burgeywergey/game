@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Klayton Rogers - Resume</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Georgia', serif;
+      font-size: 14px;
+      color: #1a1a1a;
+      background: #fff;
+      max-width: 780px;
+      margin: 40px auto;
+      padding: 40px;
+      line-height: 1.5;
+    }
+    h1 {
+      font-size: 28px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #1a1a1a;
+    }
+    .contact {
+      margin-top: 4px;
+      font-size: 13px;
+      color: #444;
+    }
+    .contact span {
+      margin-right: 16px;
+    }
+    hr {
+      border: none;
+      border-top: 2px solid #1a1a1a;
+      margin: 14px 0 18px;
+    }
+    .section-title {
+      font-size: 13px;
+      font-weight: bold;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #1a1a1a;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 4px;
+      margin-bottom: 12px;
+    }
+    .section {
+      margin-bottom: 22px;
+    }
+    p {
+      margin-bottom: 8px;
+      color: #333;
+    }
+    .job-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+    .job-title {
+      font-weight: bold;
+      font-size: 14px;
+    }
+    .job-dates {
+      font-size: 13px;
+      color: #555;
+      white-space: nowrap;
+    }
+    .job-company {
+      font-style: italic;
+      color: #444;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+    ul {
+      padding-left: 18px;
+    }
+    ul li {
+      margin-bottom: 4px;
+      color: #333;
+    }
+    .skills-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 20px;
+    }
+    .skills-grid li {
+      list-style: none;
+      padding-left: 14px;
+      position: relative;
+      color: #333;
+    }
+    .skills-grid li::before {
+      content: '▸';
+      position: absolute;
+      left: 0;
+      color: #555;
+    }
+    @media print {
+      body { margin: 0; padding: 30px; }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Klayton Rogers</h1>
+  <div class="contact">
+    <span>Smethport, Pennsylvania</span>
+    <span>814-331-7245</span>
+    <span>klaytonrogers3@gmail.com</span>
+  </div>
+  <hr/>
+
+  <!-- OBJECTIVE -->
+  <div class="section">
+    <div class="section-title">Objective</div>
+    <p>
+      Dependable and motivated individual seeking a Painter Helper position with Allegheny Paint Co.
+      Known for showing up reliably, following instructions carefully, and taking pride in doing
+      work right the first time. Eager to learn proper painting techniques and grow within a
+      skilled trade.
+    </p>
+  </div>
+
+  <!-- SKILLS -->
+  <div class="section">
+    <div class="section-title">Skills &amp; Qualifications</div>
+    <ul class="skills-grid">
+      <li>Valid Pennsylvania driver's license</li>
+      <li>Reliable personal vehicle for job site travel</li>
+      <li>Comfortable working on ladders and at heights</li>
+      <li>Able to lift and carry tools, ladders, and materials</li>
+      <li>Strong attention to detail and quality workmanship</li>
+      <li>Quick learner — picks up new skills and techniques fast</li>
+      <li>Dependable and punctual — consistent work record</li>
+      <li>Works well with others and takes direction well</li>
+    </ul>
+  </div>
+
+  <!-- EXPERIENCE -->
+  <div class="section">
+    <div class="section-title">Work Experience</div>
+
+    <div class="job-header">
+      <div class="job-title">Retail Associate</div>
+      <div class="job-dates">08/2025 &ndash; Present</div>
+    </div>
+    <div class="job-company">The Home Depot &mdash; Olean, NY</div>
+    <ul>
+      <li>Assist customers with product selection including paint, tools, lumber, and building materials</li>
+      <li>Operate heavy equipment and perform physical tasks including lifting, stocking, and moving merchandise</li>
+      <li>Maintain a clean, organized, and safe work environment on the floor and in the stockroom</li>
+      <li>Collaborate with team members and supervisors to meet daily store goals</li>
+      <li>Follow safety protocols and company procedures consistently</li>
+    </ul>
+
+    <div style="margin-top: 14px;">
+      <div class="job-header">
+        <div class="job-title">Retail Service Representative</div>
+        <div class="job-dates">05/2024 &ndash; 03/2025</div>
+      </div>
+      <div class="job-company">OSL Retail Services</div>
+      <ul>
+        <li>Delivered on-site retail support and merchandising services at assigned locations</li>
+        <li>Maintained product displays and ensured inventory was stocked and organized</li>
+        <li>Provided customer-facing service while meeting company and client standards</li>
+        <li>Adapted quickly to varying work environments and followed site-specific instructions</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- EDUCATION -->
+  <div class="section">
+    <div class="section-title">Education</div>
+    <div class="job-header">
+      <div class="job-title">Jamestown Community College</div>
+      <div class="job-dates">01/2026 &ndash; Present</div>
+    </div>
+    <div class="job-company">Associate's Program &mdash; Geography</div>
+
+    <div style="margin-top: 10px;">
+      <div class="job-header">
+        <div class="job-title">Niagara County Community College</div>
+        <div class="job-dates">08/2023 &ndash; 05/2024</div>
+      </div>
+      <div class="job-company">General Studies</div>
+    </div>
+  </div>
+
+  <!-- ADDITIONAL -->
+  <div class="section">
+    <div class="section-title">Additional Information</div>
+    <ul>
+      <li>Available for full-time, on-the-road work across residential and commercial job sites</li>
+      <li>Comfortable with job site setup, cleanup, and following structured daily routines</li>
+      <li>Interested in long-term employment and growing into a skilled painter role</li>
+    </ul>
+  </div>
+
+</body>
+</html>
